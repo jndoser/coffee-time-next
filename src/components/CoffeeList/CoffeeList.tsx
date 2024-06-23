@@ -1,19 +1,38 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { List } from "antd";
 import CoffeeItem from "../CoffeeItem/CoffeeItem";
+import axios from "axios";
 
-const data = Array.from({ length: 23 }).map((_, i) => ({
-  href: "https://ant.design",
-  title: `ant design part ${i}`,
-  avatar: `https://api.dicebear.com/7.x/miniavs/svg?seed=${i}`,
-  description:
-    "Ant Design, a design language for background applications, is refined by Ant UED Team.",
-  content:
-    "We supply a series of design principles, practical patterns and high quality design resources (Sketch and Axure), to help people create their product prototypes beautifully and efficiently.",
-}));
+interface CoffeeShopType {
+  id: string;
+  title: string;
+  address: string;
+  ownerAvatar: string;
+  bio: string;
+  previewImage: string;
+}
 
 function CoffeeList() {
+  const [coffeeShopList, setCoffeeShopList] = useState<CoffeeShopType[]>([]);
+
+  useEffect(() => {
+    const getCoffeeShopList = async () => {
+      const res = await axios.get("/api/coffee-shop");
+      const rawCoffeeShopData = res.data;
+      const coffeeShopListData = rawCoffeeShopData.map((coffeeShop: any) => ({
+        id: coffeeShop._id,
+        title: coffeeShop.title,
+        address: coffeeShop.address,
+        ownerAvatar: coffeeShop.owner.photo,
+        bio: coffeeShop.bio,
+        previewImage: coffeeShop.images[0],
+      }));
+      setCoffeeShopList(coffeeShopListData);
+    };
+    getCoffeeShopList();
+  }, []);
+
   return (
     <List
       itemLayout="vertical"
@@ -25,15 +44,16 @@ function CoffeeList() {
         pageSize: 5,
         style: { textAlign: "center" },
       }}
-      dataSource={data}
-      renderItem={(item) => (
+      dataSource={coffeeShopList}
+      renderItem={(item: CoffeeShopType) => (
         <CoffeeItem
-          key={item.title}
-          href={item.href}
+          key={item.id}
+          id={item.id}
           title={item.title}
-          avatar={item.avatar}
-          description={item.description}
-          content={item.content}
+          ownerAvatar={item.ownerAvatar}
+          address={item.address}
+          bio={item.bio}
+          previewImage={item.previewImage}
         />
       )}
     />

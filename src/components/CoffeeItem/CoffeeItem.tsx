@@ -17,11 +17,12 @@ const IconText = ({ icon, text }: { icon: React.FC; text: string }) => (
 );
 
 interface CoffeeItemProps {
-  href: string;
+  id: string
   title: string;
-  avatar: string;
-  description: string;
-  content: string;
+  address: string;
+  ownerAvatar: string;
+  bio: string;
+  previewImage: string;
 }
 
 function CoffeeItem(item: CoffeeItemProps) {
@@ -43,8 +44,8 @@ function CoffeeItem(item: CoffeeItemProps) {
         <Image
           width={272}
           height={100}
-          alt="logo"
-          src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png"
+          alt="preview-coffee-shop-image"
+          src={item.previewImage}
           style={{ borderRadius: "16px" }}
         />
       }
@@ -57,17 +58,17 @@ function CoffeeItem(item: CoffeeItemProps) {
       }}
     >
       <List.Item.Meta
-        avatar={<Avatar src={item.avatar} />}
-        title={<a href={item.href}>{item.title}</a>}
+        avatar={<Avatar src={item.ownerAvatar} />}
+        title={item.title}
         description={
           <IconText
             icon={EnvironmentOutlined}
-            text={item.description}
+            text={item.address}
             key="list-vertical-like-o"
           />
         }
       />
-      {item.content}
+      {item.bio}
     </List.Item>
   );
 }
