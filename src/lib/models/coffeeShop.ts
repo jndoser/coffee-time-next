@@ -2,6 +2,7 @@ import { Schema, model, models } from "mongoose";
 
 const CoffeeShopSchema = new Schema({
   title: { type: String, require: true },
+  address: { type: String, require: true },
   bio: { type: String, require: true },
   description: { type: String, require: true },
   images: [{ type: String, require: true }],
