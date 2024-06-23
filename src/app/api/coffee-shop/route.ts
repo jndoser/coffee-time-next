@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
   try {
-    const coffeeShops = CoffeeShop.find().populate("owner");
+    const coffeeShops = await CoffeeShop.find().populate("owner");
     return new NextResponse(JSON.stringify(coffeeShops), { status: 200 });
   } catch (error: any) {
     return new NextResponse("Error in fetching coffee shop " + error, {
