@@ -4,6 +4,7 @@ const FoodBevarageSchema = new Schema(
   {
     title: { type: String, require: true },
     price: { type: Number, require: true },
+    coffeeShop: { type: Schema.Types.ObjectId, ref: "CoffeeShop" },
   },
   {
     timestamps: true,
