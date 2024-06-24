@@ -6,6 +6,7 @@ import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
   try {
+    await connect();
     const coffeeShops = await CoffeeShop.find({}).populate("owner");
     return NextResponse.json(coffeeShops, { status: 200 });
   } catch (error: any) {
