@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 
 export async function GET(req: Request, context: { params: any }) {
   try {
-    const { coffeeShopId } = context.params.coffeeShopId;
+    const { coffeeShopId } = context.params;
 
     if (!coffeeShopId || !Types.ObjectId.isValid(coffeeShopId)) {
       return NextResponse.json(
@@ -15,7 +15,7 @@ export async function GET(req: Request, context: { params: any }) {
     }
 
     await connect();
-    const coffeeShop = CoffeeShop.findById(coffeeShopId);
+    const coffeeShop = await CoffeeShop.findById(coffeeShopId);
 
     if (!coffeeShop) {
       return NextResponse.json(
@@ -27,7 +27,7 @@ export async function GET(req: Request, context: { params: any }) {
     return NextResponse.json(coffeeShop, { status: 200 });
   } catch (error) {
     return NextResponse.json(
-      { message: "Error while creating feedback " + error },
+      { message: "Error while fetching coffee shop " + error },
       { status: 500 }
     );
   }
