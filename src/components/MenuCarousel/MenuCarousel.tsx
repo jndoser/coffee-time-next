@@ -1,9 +1,11 @@
+"use client";
 import { Card, Carousel, Flex, Space } from "antd";
 import Meta from "antd/es/card/Meta";
 import Title from "antd/es/typography/Title";
 import Image from "next/image";
 import { DollarOutlined } from "@ant-design/icons";
-import React from "react";
+import React, { useEffect } from "react";
+import axios from "axios";
 
 const IconText = ({ icon, text }: { icon: React.FC; text: string }) => (
   <Space>
@@ -11,6 +13,13 @@ const IconText = ({ icon, text }: { icon: React.FC; text: string }) => (
     {text}
   </Space>
 );
+
+interface FoodAndBeverageType {
+  id: string;
+  title: string;
+  price: number;
+  image: string;
+}
 
 const ListBeverage = () => {
   return (
@@ -47,7 +56,30 @@ const ListBeverage = () => {
   );
 };
 
-function MenuCarousel() {
+interface MenuCarouselProps {
+  coffeeShopId: string;
+}
+
+function MenuCarousel({ coffeeShopId }: MenuCarouselProps) {
+  useEffect(() => {
+    const getFoodAndBeverage = async (coffeeShopId: string) => {
+      const res = await axios.get(
+        "/api/food-beverage?coffeeShopId=" + coffeeShopId
+      );
+      const rawFoodAndBeverageData = res.data;
+      const foodAndBeverageInfo = rawFoodAndBeverageData.map(
+        (foodBeverage: any) => ({
+          id: foodBeverage._id,
+          title: foodBeverage.title,
+          price: foodBeverage.price,
+          image: foodBeverage.image,
+        })
+      );
+      console.log("foodAndBeverageInfo", foodAndBeverageInfo);
+    };
+    getFoodAndBeverage(coffeeShopId);
+  }, [coffeeShopId]);
+
   return (
     <div style={{ marginTop: "20px" }}>
       <Title level={3}>Food & Beverage</Title>
