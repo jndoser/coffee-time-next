@@ -1,56 +1,26 @@
-import { Card, Carousel, Flex, Typography } from "antd";
+import { Card, Flex, Typography } from "antd";
 import Paragraph from "antd/es/typography/Paragraph";
 import Title from "antd/es/typography/Title";
-import Image from "next/image";
 import React from "react";
+import CoffeePicturesSection from "../CoffeePicturesSection/CoffeePicturesSection";
+import MenuCarousel from "../MenuCarousel/MenuCarousel";
+import CommentSection from "../CommentSection/CommentSection";
 
-const contentStyle: React.CSSProperties = {
-  height: "160px",
-  color: "#fff",
-  lineHeight: "160px",
-  textAlign: "center",
-  background: "#364d79",
-};
+interface CoffeeDetailProps {
+  coffeeShopId: string;
+}
 
-function CoffeeDetail() {
+function CoffeeDetail({ coffeeShopId }: CoffeeDetailProps) {
+  console.log("CoffeeDetail ", coffeeShopId);
   return (
-    <Flex vertical align="center" justify="center">
-      <Carousel effect="fade" style={{ width: "872px", height: "300px" }}>
-        <Image
-          style={{ objectFit: "contain" }}
-          width={872}
-          height={300}
-          alt="logo"
-          src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png"
-        />
-        <Image
-          style={{ objectFit: "contain" }}
-          width={872}
-          height={300}
-          alt="logo"
-          src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png"
-        />
-
-        <Image
-          style={{ objectFit: "contain" }}
-          width={872}
-          height={300}
-          alt="logo"
-          src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png"
-        />
-        <Image
-          style={{ objectFit: "contain" }}
-          width={872}
-          height={300}
-          alt="logo"
-          src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png"
-        />
-      </Carousel>
-      <Card hoverable>
+    <Flex vertical gap={4}>
+      <Title level={3}>SHill luxury Villa Halong/6BRs/Private Pool</Title>
+      <CoffeePicturesSection />
+      <Card hoverable style={{ marginTop: "20px" }}>
         <Typography>
-          <Title>Coffee shop title</Title>
+          <Title level={3}>Coffee shop title</Title>
           <Paragraph>Bio of coffee shop</Paragraph>
-          <Title>Description</Title>
+          <Title level={3}>Description</Title>
           <Paragraph>
             In the process of internal desktop applications development, many
             different design specs and implementations would be involved, which
@@ -59,6 +29,8 @@ function CoffeeDetail() {
           </Paragraph>
         </Typography>
       </Card>
+      <MenuCarousel />
+      <CommentSection />
     </Flex>
   );
 }

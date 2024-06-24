@@ -17,7 +17,7 @@ const IconText = ({ icon, text }: { icon: React.FC; text: string }) => (
 );
 
 interface CoffeeItemProps {
-  id: string
+  id: string;
   title: string;
   address: string;
   ownerAvatar: string;
@@ -29,7 +29,9 @@ function CoffeeItem(item: CoffeeItemProps) {
   const router = useRouter();
   return (
     <List.Item
-      onClick={() => {router.push("/coffee-shop/" + 1)}}
+      onClick={() => {
+        router.push("/coffee-shop/" + item.id);
+      }}
       key={item.title}
       actions={[
         <IconText icon={StarOutlined} text="156" key="list-vertical-star-o" />,
