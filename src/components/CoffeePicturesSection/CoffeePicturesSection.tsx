@@ -4,7 +4,11 @@ import { HolderOutlined } from "@ant-design/icons";
 import React, { useState } from "react";
 import CoffeePicturesModal from "../CoffeePicturesModal/CoffeePicturesModal";
 
-function CoffeePicturesSection() {
+interface CoffeePicturesSectionProps {
+  images: string[];
+}
+
+function CoffeePicturesSection({ images }: CoffeePicturesSectionProps) {
   const [isOpenModal, setIsOpenModal] = useState(false);
   const openModalHandler = () => {
     setIsOpenModal(true);
@@ -16,17 +20,17 @@ function CoffeePicturesSection() {
     <>
       <Flex gap={2}>
         <Image
-          src="https://a0.muscache.com/im/pictures/miso/Hosting-52539316/original/942e2903-4f17-4753-8f91-09dcc0617e64.jpeg?im_w=960"
+          src={images[0]}
           alt="test-1"
           width={"50%"}
           height={388}
           style={{ borderRadius: "16px" }}
         />
         <Flex gap={2} style={{ width: "50%", position: "relative" }} wrap>
-          {[1, 2, 3, 4, 5, 6].map((data, index) => (
+          {images.slice(1, 7).map((data, index) => (
             <Image
               key={index}
-              src="https://a0.muscache.com/im/pictures/miso/Hosting-52539316/original/942e2903-4f17-4753-8f91-09dcc0617e64.jpeg?im_w=960"
+              src={data}
               alt="test"
               width={200}
               height={192}
