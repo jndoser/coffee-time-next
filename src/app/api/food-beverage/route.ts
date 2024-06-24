@@ -1,6 +1,6 @@
 import connect from "@/lib/db";
 import CoffeeShop from "@/lib/models/coffeeShop";
-import FoodBevarage from "@/lib/models/foodBevarage";
+import FoodBeverage from "@/lib/models/foodBeverage";
 import { Types } from "mongoose";
 import { NextResponse } from "next/server";
 
@@ -26,7 +26,7 @@ export async function GET(req: Request) {
       );
     }
 
-    const foodAndBeverageList = await FoodBevarage.find({
+    const foodAndBeverageList = await FoodBeverage.find({
       coffeeShop: coffeeShopId,
     });
     return NextResponse.json(foodAndBeverageList, { status: 200 });
@@ -60,11 +60,12 @@ export async function POST(req: Request) {
       );
     }
 
-    const { title, price } = await req.json();
+    const { title, price, image } = await req.json();
 
-    const newFoodBeverage = new FoodBevarage({
+    const newFoodBeverage = new FoodBeverage({
       title,
       price,
+      image,
       coffeeShop: coffeeShopId,
     });
 
