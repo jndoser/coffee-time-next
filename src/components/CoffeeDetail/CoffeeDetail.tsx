@@ -1,35 +1,57 @@
+"use client";
 import { Card, Flex, Typography } from "antd";
 import Paragraph from "antd/es/typography/Paragraph";
 import Title from "antd/es/typography/Title";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import CoffeePicturesSection from "../CoffeePicturesSection/CoffeePicturesSection";
 import MenuCarousel from "../MenuCarousel/MenuCarousel";
 import CommentSection from "../CommentSection/CommentSection";
+import axios from "axios";
 
 interface CoffeeDetailProps {
   coffeeShopId: string;
 }
 
+interface CoffeeShopType {
+  id: string;
+  title: string;
+  bio: string;
+  description: string;
+  images: string[];
+}
+
 function CoffeeDetail({ coffeeShopId }: CoffeeDetailProps) {
-  console.log("CoffeeDetail ", coffeeShopId);
+  const [coffeeShopInfo, setCoffeeShopInfo] = useState<CoffeeShopType>();
+
+  useEffect(() => {
+    const getCoffeeShopById = async (coffeeShopId: string) => {
+      const res = await axios.get("/api/coffee-shop/" + coffeeShopId);
+      const rawCoffeeShopData = res.data;
+      const coffeeShopData = {
+        id: rawCoffeeShopData._id,
+        title: rawCoffeeShopData.title,
+        bio: rawCoffeeShopData.bio,
+        description: rawCoffeeShopData.description,
+        images: rawCoffeeShopData.images,
+      };
+      setCoffeeShopInfo(coffeeShopData);
+    };
+    getCoffeeShopById(coffeeShopId);
+  }, []);
+
   return (
     <Flex vertical gap={4}>
-      <Title level={3}>SHill luxury Villa Halong/6BRs/Private Pool</Title>
-      <CoffeePicturesSection />
+      <Title level={3}>{coffeeShopInfo?.title}</Title>
+      <CoffeePicturesSection images={coffeeShopInfo?.images ?? []} />
       <Card hoverable style={{ marginTop: "20px" }}>
         <Typography>
-          <Title level={3}>Coffee shop title</Title>
-          <Paragraph>Bio of coffee shop</Paragraph>
+          <Title level={3}>{coffeeShopInfo?.title}</Title>
+          <Paragraph>{coffeeShopInfo?.bio}</Paragraph>
           <Title level={3}>Description</Title>
-          <Paragraph>
-            In the process of internal desktop applications development, many
-            different design specs and implementations would be involved, which
-            might cause designers and developers difficulties and duplication
-            and reduce the efficiency of development.
-          </Paragraph>
+          <Paragraph>{coffeeShopInfo?.description}</Paragraph>
         </Typography>
       </Card>
-      <MenuCarousel />
+      <MenuCarousel coffeeShopId={coffeeShopId} />
       <CommentSection />
     </Flex>
   );
