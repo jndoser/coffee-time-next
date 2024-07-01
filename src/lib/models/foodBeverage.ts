@@ -13,6 +13,6 @@ const FoodBeverageSchema = new Schema(
 );
 
 const FoodBeverage =
-  models?.FoodBeverage || model("FoodBevarage", FoodBeverageSchema);
+  models?.FoodBeverage || model("FoodBeverage", FoodBeverageSchema);
 
 export default FoodBeverage;

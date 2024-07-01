@@ -3,6 +3,7 @@ import { Button, Flex, Image } from "antd";
 import { HolderOutlined } from "@ant-design/icons";
 import React, { useState } from "react";
 import CoffeePicturesModal from "../CoffeePicturesModal/CoffeePicturesModal";
+import styles from "./CoffeePicturesSection.module.css";
 
 interface CoffeePicturesSectionProps {
   images: string[];
@@ -25,6 +26,9 @@ function CoffeePicturesSection({ images }: CoffeePicturesSectionProps) {
           width={"50%"}
           height={388}
           style={{ borderRadius: "16px" }}
+          preview={{
+            maskClassName: styles.maskStyle,
+          }}
         />
         <Flex gap={2} style={{ width: "50%", position: "relative" }} wrap>
           {images.slice(1, 7).map((data, index) => (
@@ -35,6 +39,9 @@ function CoffeePicturesSection({ images }: CoffeePicturesSectionProps) {
               width={200}
               height={192}
               style={{ borderRadius: "16px" }}
+              preview={{
+                maskClassName: styles.maskStyle,
+              }}
             />
           ))}
           <Button
@@ -50,6 +57,7 @@ function CoffeePicturesSection({ images }: CoffeePicturesSectionProps) {
         </Flex>
       </Flex>
       <CoffeePicturesModal
+        images={images}
         isOpen={isOpenModal}
         openModal={openModalHandler}
         closeModal={closeModalHandler}

@@ -9,6 +9,8 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const coffeeShopId = searchParams.get("coffeeShopId");
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "3");
 
     if (!coffeeShopId || !Types.ObjectId.isValid(coffeeShopId)) {
       return NextResponse.json(
@@ -27,9 +29,14 @@ export async function GET(req: Request) {
       );
     }
 
+    const skip = (page - 1) * limit;
+
     const feedbacks = await Feedback.find({
       coffeeShop: coffeeShopId,
-    }).populate("owner");
+    })
+      .skip(skip)
+      .limit(limit)
+      .populate("owner");
     return NextResponse.json(feedbacks, { status: 200 });
   } catch (error: any) {
     return NextResponse.json(
@@ -93,7 +100,7 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         message: "Feedback is created",
-        foodBeverage: newFeedback,
+        feedback: newFeedback,
       },
       { status: 201 }
     );

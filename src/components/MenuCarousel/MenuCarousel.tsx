@@ -4,7 +4,7 @@ import Meta from "antd/es/card/Meta";
 import Title from "antd/es/typography/Title";
 import Image from "next/image";
 import { DollarOutlined } from "@ant-design/icons";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 const IconText = ({ icon, text }: { icon: React.FC; text: string }) => (
@@ -21,30 +21,34 @@ interface FoodAndBeverageType {
   image: string;
 }
 
-const ListBeverage = () => {
+interface ListBeverageProps {
+  foodAndBeverages: FoodAndBeverageType[];
+}
+
+const ListBeverage = ({ foodAndBeverages }: ListBeverageProps) => {
   return (
     <Flex gap={4} style={{ flexGrow: "1.5" }}>
-      {[1, 2, 3, 4, 5].map((data, index) => {
+      {foodAndBeverages.map((foodAndBeverage: FoodAndBeverageType) => {
         return (
           <Card
-            key={index}
+            key={foodAndBeverage.id}
             hoverable
             style={{ width: 240, margin: "10px" }}
             cover={
               <Image
-                alt="example"
-                src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png"
+                alt={foodAndBeverage.title}
+                src={foodAndBeverage.image}
                 width={200}
                 height={200}
               />
             }
           >
             <Meta
-              title="Salt Cream Coffee"
+              title={foodAndBeverage.title}
               description={
                 <IconText
                   icon={DollarOutlined}
-                  text="45,000 VND"
+                  text={`${foodAndBeverage.price} VND`}
                   key="list-vertical-like-o"
                 />
               }
@@ -60,7 +64,20 @@ interface MenuCarouselProps {
   coffeeShopId: string;
 }
 
+const formatMenuData = (menuData: FoodAndBeverageType[]) => {
+  const numberItems = 5;
+  const formattedMenuData = [];
+  for (let i = 0; i <= menuData.length; i += numberItems) {
+    const subArray = menuData.slice(i, i + numberItems);
+    formattedMenuData.push(subArray);
+  }
+  return formattedMenuData;
+};
+
 function MenuCarousel({ coffeeShopId }: MenuCarouselProps) {
+  const [formattedMenu, setFormattedMenu] = useState<FoodAndBeverageType[][]>(
+    []
+  );
   useEffect(() => {
     const getFoodAndBeverage = async (coffeeShopId: string) => {
       const res = await axios.get(
@@ -75,7 +92,8 @@ function MenuCarousel({ coffeeShopId }: MenuCarouselProps) {
           image: foodBeverage.image,
         })
       );
-      console.log("foodAndBeverageInfo", foodAndBeverageInfo);
+      const formattedData = formatMenuData(foodAndBeverageInfo);
+      setFormattedMenu(formattedData);
     };
     getFoodAndBeverage(coffeeShopId);
   }, [coffeeShopId]);
@@ -84,10 +102,10 @@ function MenuCarousel({ coffeeShopId }: MenuCarouselProps) {
     <div style={{ marginTop: "20px" }}>
       <Title level={3}>Food & Beverage</Title>
       <Carousel effect="fade" style={{ height: "420px" }} autoplay>
-        {[1, 2, 3, 4].map((data, index) => {
+        {formattedMenu.map((data: FoodAndBeverageType[], index) => {
           return (
             <div key={index}>
-              <ListBeverage />
+              <ListBeverage foodAndBeverages={data} />
             </div>
           );
         })}

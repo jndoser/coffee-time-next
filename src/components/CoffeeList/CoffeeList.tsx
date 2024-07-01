@@ -15,22 +15,26 @@ interface CoffeeShopType {
 
 function CoffeeList() {
   const [coffeeShopList, setCoffeeShopList] = useState<CoffeeShopType[]>([]);
-
-  useEffect(() => {
-    const getCoffeeShopList = async () => {
-      const res = await axios.get("/api/coffee-shop");
-      const rawCoffeeShopData = res.data;
-      const coffeeShopListData = rawCoffeeShopData.map((coffeeShop: any) => ({
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const getCoffeeShopList = async (page: number) => {
+    const res = await axios.get(`/api/coffee-shop?page=${page}&limit=5`);
+    const rawCoffeeShopData = res.data;
+    const coffeeShopListData = rawCoffeeShopData.coffeeShops.map(
+      (coffeeShop: any) => ({
         id: coffeeShop._id,
         title: coffeeShop.title,
         address: coffeeShop.address,
         ownerAvatar: coffeeShop.owner.photo,
         bio: coffeeShop.bio,
         previewImage: coffeeShop.images[0],
-      }));
-      setCoffeeShopList(coffeeShopListData);
-    };
-    getCoffeeShopList();
+      })
+    );
+    setCoffeeShopList(coffeeShopListData);
+    setTotalCount(rawCoffeeShopData.totalCount);
+  };
+
+  useEffect(() => {
+    getCoffeeShopList(1);
   }, []);
 
   return (
@@ -38,10 +42,11 @@ function CoffeeList() {
       itemLayout="vertical"
       size="large"
       pagination={{
-        onChange: (page) => {
-          console.log(page);
+        onChange: async (page) => {
+          await getCoffeeShopList(page);
         },
         pageSize: 5,
+        total: totalCount,
         style: { textAlign: "center" },
       }}
       dataSource={coffeeShopList}
