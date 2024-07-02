@@ -34,6 +34,9 @@ export async function GET(req: Request) {
     const feedbacks = await Feedback.find({
       coffeeShop: coffeeShopId,
     })
+      .sort({
+        createdAt: "desc",
+      })
       .skip(skip)
       .limit(limit)
       .populate("owner");

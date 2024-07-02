@@ -30,6 +30,7 @@ const CommentSection: React.FC = () => {
   const [numberOfLoadButtonClick, setNumberOfLoadButtonClick] = useState(1);
   const [data, setData] = useState<DataType[]>([]);
   const [list, setList] = useState<DataType[]>([]);
+  const [comment, setComment] = useState("");
 
   useEffect(() => {
     const getFeedbacks = async () => {
@@ -101,6 +102,11 @@ const CommentSection: React.FC = () => {
     window.dispatchEvent(new Event("resize"));
   };
 
+  const sendFeedbackHandler = () => {
+    console.log("feedback: ", comment);
+    console.log("userId: ", userId);
+  }
+
   const loadMore =
     !initLoading && !loading ? (
       <div
@@ -121,8 +127,12 @@ const CommentSection: React.FC = () => {
       <Space.Compact
         style={{ width: "60%", marginTop: "20px", marginBottom: "20px" }}
       >
-        <Input defaultValue="Leave your feedback ..." />
-        <Button type="primary">Submit</Button>
+        <Input
+          defaultValue="Leave your feedback ..."
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+        />
+        <Button type="primary" onClick={sendFeedbackHandler}>Submit</Button>
       </Space.Compact>
       <List
         className="demo-loadmore-list"
