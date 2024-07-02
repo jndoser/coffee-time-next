@@ -1,10 +1,14 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Breadcrumb, Layout, Menu, theme } from "antd";
 import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import Search from "antd/es/input/Search";
 import Title from "antd/es/typography/Title";
 import { useRouter } from "next/navigation";
+import { Provider, useDispatch } from "react-redux";
+import { store } from "@/store/store";
+import { setSearchKeywords } from "@/store/slicers/searchKeywordsSlicer";
+import StoreProviderLayout from "./store-provider-layout";
 
 const { Header, Content, Footer } = Layout;
 
@@ -24,6 +28,15 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
   const router = useRouter();
+  const dispatch = useDispatch();
+  const [keywords, setKeywords] = useState("");
+
+  useEffect(() => {
+    const saveSearchKeywords = setTimeout(() => {
+      dispatch(setSearchKeywords(keywords));
+    }, 500);
+    return () => clearTimeout(saveSearchKeywords);
+  }, [keywords]);
 
   return (
     <Layout>
@@ -83,6 +96,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           placeholder="Input the name ..."
           style={{ width: "500px", marginTop: "10px", marginBottom: "10px" }}
           size="large"
+          onChange={(e) => setKeywords(e.target.value)}
         />
       </Header>
       <Content style={{ padding: "0 48px", backgroundColor: "white" }}>

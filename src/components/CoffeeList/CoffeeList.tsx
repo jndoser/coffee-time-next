@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import { List } from "antd";
 import CoffeeItem from "../CoffeeItem/CoffeeItem";
 import axios from "axios";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
 interface CoffeeShopType {
   id: string;
@@ -16,8 +18,12 @@ interface CoffeeShopType {
 function CoffeeList() {
   const [coffeeShopList, setCoffeeShopList] = useState<CoffeeShopType[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
-  const getCoffeeShopList = async (page: number) => {
-    const res = await axios.get(`/api/coffee-shop?page=${page}&limit=5`);
+  const searchKeywords = useSelector(
+    (state: RootState) => state.searchKeywords.searchKeywords
+  );
+
+  const getCoffeeShopList = async (page: number, searchKeywords: string) => {
+    const res = await axios.get(`/api/coffee-shop?page=${page}&limit=5&searchKeywords=${searchKeywords}`);
     const rawCoffeeShopData = res.data;
     const coffeeShopListData = rawCoffeeShopData.coffeeShops.map(
       (coffeeShop: any) => ({
@@ -34,8 +40,8 @@ function CoffeeList() {
   };
 
   useEffect(() => {
-    getCoffeeShopList(1);
-  }, []);
+    getCoffeeShopList(1, searchKeywords);
+  }, [searchKeywords]);
 
   return (
     <List
@@ -43,7 +49,7 @@ function CoffeeList() {
       size="large"
       pagination={{
         onChange: async (page) => {
-          await getCoffeeShopList(page);
+          await getCoffeeShopList(page, "");
         },
         pageSize: 5,
         total: totalCount,
