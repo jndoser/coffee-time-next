@@ -18,12 +18,16 @@ interface CoffeeShopType {
 function CoffeeList() {
   const [coffeeShopList, setCoffeeShopList] = useState<CoffeeShopType[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
+  const [loading, setLoading] = useState(false);
   const searchKeywords = useSelector(
     (state: RootState) => state.searchKeywords.searchKeywords
   );
 
   const getCoffeeShopList = async (page: number, searchKeywords: string) => {
-    const res = await axios.get(`/api/coffee-shop?page=${page}&limit=5&searchKeywords=${searchKeywords}`);
+    setLoading(true);
+    const res = await axios.get(
+      `/api/coffee-shop?page=${page}&limit=5&searchKeywords=${searchKeywords}`
+    );
     const rawCoffeeShopData = res.data;
     const coffeeShopListData = rawCoffeeShopData.coffeeShops.map(
       (coffeeShop: any) => ({
@@ -37,6 +41,7 @@ function CoffeeList() {
     );
     setCoffeeShopList(coffeeShopListData);
     setTotalCount(rawCoffeeShopData.totalCount);
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -65,6 +70,7 @@ function CoffeeList() {
           address={item.address}
           bio={item.bio}
           previewImage={item.previewImage}
+          loading={loading}
         />
       )}
     />

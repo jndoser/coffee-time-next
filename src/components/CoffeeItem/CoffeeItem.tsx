@@ -5,16 +5,29 @@ import {
   StarOutlined,
   EnvironmentOutlined,
 } from "@ant-design/icons";
-import { Avatar, List, Space } from "antd";
+import { Avatar, List, Skeleton, Space } from "antd";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import SkeletonButton from "antd/es/skeleton/Button";
+import SkeletonImage from "antd/es/skeleton/Image";
 
-const IconText = ({ icon, text }: { icon: React.FC; text: string }) => (
-  <Space>
-    {React.createElement(icon)}
-    {text}
-  </Space>
-);
+const IconText = ({
+  icon,
+  text,
+  loading,
+}: {
+  icon: React.FC;
+  text: string;
+  loading?: boolean;
+}) =>
+  loading ? (
+    <SkeletonButton active shape="round" />
+  ) : (
+    <Space>
+      {React.createElement(icon)}
+      {text}
+    </Space>
+  );
 
 interface CoffeeItemProps {
   id: string;
@@ -23,6 +36,7 @@ interface CoffeeItemProps {
   ownerAvatar: string;
   bio: string;
   previewImage: string;
+  loading: boolean;
 }
 
 function CoffeeItem(item: CoffeeItemProps) {
@@ -34,22 +48,37 @@ function CoffeeItem(item: CoffeeItemProps) {
       }}
       key={item.title}
       actions={[
-        <IconText icon={StarOutlined} text="156" key="list-vertical-star-o" />,
-        <IconText icon={LikeOutlined} text="156" key="list-vertical-like-o" />,
+        <IconText
+          icon={StarOutlined}
+          text="156"
+          key="list-vertical-star-o"
+          loading={item.loading}
+        />,
+        <IconText
+          icon={LikeOutlined}
+          text="156"
+          key="list-vertical-like-o"
+          loading={item.loading}
+        />,
         <IconText
           icon={MessageOutlined}
           text="2"
           key="list-vertical-message"
+          loading={item.loading}
         />,
       ]}
       extra={
-        <Image
-          width={272}
-          height={100}
-          alt="preview-coffee-shop-image"
-          src={item.previewImage}
-          style={{ borderRadius: "16px" }}
-        />
+        item.loading ? (
+          <SkeletonImage active />
+        ) : (
+          <Image
+            width={272}
+            height={100}
+            alt="preview-coffee-shop-image"
+            src={item.previewImage}
+            style={{ borderRadius: "16px" }}
+          />
+        )
       }
       style={{
         borderBlockEnd: "none",
@@ -59,18 +88,20 @@ function CoffeeItem(item: CoffeeItemProps) {
         cursor: "pointer",
       }}
     >
-      <List.Item.Meta
-        avatar={<Avatar src={item.ownerAvatar} />}
-        title={item.title}
-        description={
-          <IconText
-            icon={EnvironmentOutlined}
-            text={item.address}
-            key="list-vertical-like-o"
-          />
-        }
-      />
-      {item.bio}
+      <Skeleton loading={item.loading} avatar active>
+        <List.Item.Meta
+          avatar={<Avatar src={item.ownerAvatar} />}
+          title={item.title}
+          description={
+            <IconText
+              icon={EnvironmentOutlined}
+              text={item.address}
+              key="list-vertical-like-o"
+            />
+          }
+        />
+        {item.bio}
+      </Skeleton>
     </List.Item>
   );
 }
