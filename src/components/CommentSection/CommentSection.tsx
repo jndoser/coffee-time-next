@@ -24,7 +24,11 @@ interface DataType {
 
 const count = 3;
 
-const CommentSection: React.FC = () => {
+interface CommentSectionProps {
+  coffeeShopId: string;
+}
+
+const CommentSection: React.FC<CommentSectionProps> = ({coffeeShopId}) => {
   const [initLoading, setInitLoading] = useState(true);
   const [loading, setLoading] = useState(false);
   const [numberOfLoadButtonClick, setNumberOfLoadButtonClick] = useState(1);
@@ -104,7 +108,6 @@ const CommentSection: React.FC = () => {
 
   const sendFeedbackHandler = () => {
     console.log("feedback: ", comment);
-    console.log("userId: ", userId);
   }
 
   const loadMore =

@@ -52,7 +52,7 @@ function CoffeeDetail({ coffeeShopId }: CoffeeDetailProps) {
         </Typography>
       </Card>
       <MenuCarousel coffeeShopId={coffeeShopId} />
-      <CommentSection />
+      <CommentSection coffeeShopId={coffeeShopId} />
     </Flex>
   );
 }

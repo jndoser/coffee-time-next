@@ -1,14 +1,19 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Breadcrumb, Layout, Menu, theme } from "antd";
-import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { Layout, Menu, theme } from "antd";
+import {
+  SignInButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+  useAuth,
+} from "@clerk/nextjs";
 import Search from "antd/es/input/Search";
-import Title from "antd/es/typography/Title";
 import { useRouter } from "next/navigation";
-import { Provider, useDispatch } from "react-redux";
-import { store } from "@/store/store";
+import { useDispatch } from "react-redux";
 import { setSearchKeywords } from "@/store/slicers/searchKeywordsSlicer";
-import StoreProviderLayout from "./store-provider-layout";
+import axios from "axios";
+import { setUserInfo } from "@/store/slicers/userInfoSlicer";
 
 const { Header, Content, Footer } = Layout;
 
@@ -30,6 +35,25 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   const router = useRouter();
   const dispatch = useDispatch();
   const [keywords, setKeywords] = useState("");
+  const { userId } = useAuth();
+
+  useEffect(() => {
+    const saveUserInfo = async () => {
+      const rawUserInfo = await axios.get(`/api/user?clerkId=${userId}`);
+      const userInfo = {
+        id: rawUserInfo.data._id,
+        clerkId: rawUserInfo.data.clerkId,
+        email: rawUserInfo.data.email,
+        username: rawUserInfo.data.username,
+        photo: rawUserInfo.data.photo,
+        firstName: rawUserInfo.data.firstName,
+        lastName: rawUserInfo.data.lastName,
+      };
+
+      dispatch(setUserInfo(userInfo));
+    };
+    saveUserInfo();
+  }, []);
 
   useEffect(() => {
     const saveSearchKeywords = setTimeout(() => {
