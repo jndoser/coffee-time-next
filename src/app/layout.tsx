@@ -6,6 +6,7 @@ import MainLayout from "@/layouts/main-layout";
 import { ClerkProvider } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import StoreProviderLayout from "@/layouts/store-provider-layout";
+import { App } from "antd";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -28,7 +29,9 @@ export default function RootLayout({
           <AntdRegistry>
             {userId ? (
               <StoreProviderLayout>
-                <MainLayout>{children}</MainLayout>
+                <App>
+                  <MainLayout>{children}</MainLayout>
+                </App>
               </StoreProviderLayout>
             ) : (
               <div

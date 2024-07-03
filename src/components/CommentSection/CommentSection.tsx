@@ -1,8 +1,10 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Avatar, Button, Input, List, Skeleton, Space } from "antd";
+import { App, Avatar, Button, Input, List, Skeleton, Space } from "antd";
 import Title from "antd/es/typography/Title";
 import axios from "axios";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
 interface DataType {
   gender?: string;
@@ -28,39 +30,43 @@ interface CommentSectionProps {
   coffeeShopId: string;
 }
 
-const CommentSection: React.FC<CommentSectionProps> = ({coffeeShopId}) => {
+const CommentSection: React.FC<CommentSectionProps> = ({ coffeeShopId }) => {
   const [initLoading, setInitLoading] = useState(true);
   const [loading, setLoading] = useState(false);
   const [numberOfLoadButtonClick, setNumberOfLoadButtonClick] = useState(1);
   const [data, setData] = useState<DataType[]>([]);
   const [list, setList] = useState<DataType[]>([]);
   const [comment, setComment] = useState("");
+  const userId = useSelector((state: RootState) => state.userInfo.id);
+
+  const { message } = App.useApp();
+
+  const getFeedbacks = async () => {
+    const rawFeedbacks = await axios.get(
+      `/api/feedback?coffeeShopId=66781d3452252c813d848b76&page=${numberOfLoadButtonClick}&limit=${count}`
+    );
+
+    const feedbacksInfo = rawFeedbacks.data;
+    const feedbackData = feedbacksInfo.map((feedback: any) => ({
+      name: {
+        first: feedback.owner.firstName,
+        last: feedback.owner.lastName,
+      },
+      picture: {
+        large: feedback.owner.photo,
+        medium: feedback.owner.photo,
+        thumnail: feedback.owner.photo,
+      },
+      description: feedback.description,
+      email: feedback.owner.email,
+    }));
+
+    setInitLoading(false);
+    setData(feedbackData);
+    setList(feedbackData);
+  };
 
   useEffect(() => {
-    const getFeedbacks = async () => {
-      const rawFeedbacks = await axios.get(
-        `/api/feedback?coffeeShopId=66781d3452252c813d848b76&page=${numberOfLoadButtonClick}&limit=${count}`
-      );
-
-      const feedbacksInfo = rawFeedbacks.data;
-      const feedbackData = feedbacksInfo.map((feedback: any) => ({
-        name: {
-          first: feedback.owner.firstName,
-          last: feedback.owner.lastName,
-        },
-        picture: {
-          large: feedback.owner.photo,
-          medium: feedback.owner.photo,
-          thumnail: feedback.owner.photo,
-        },
-        description: feedback.description,
-        email: feedback.owner.email,
-      }));
-
-      setInitLoading(false);
-      setData(feedbackData);
-      setList(feedbackData);
-    };
     getFeedbacks();
   }, []);
 
@@ -106,9 +112,20 @@ const CommentSection: React.FC<CommentSectionProps> = ({coffeeShopId}) => {
     window.dispatchEvent(new Event("resize"));
   };
 
-  const sendFeedbackHandler = () => {
-    console.log("feedback: ", comment);
-  }
+  const sendFeedbackHandler = async () => {
+    const res = await axios.post(
+      `/api/feedback?coffeeShopId=${coffeeShopId}&userId=${userId}`,
+      {
+        description: comment,
+        numberOfUpvote: 0,
+        numberOfDownvote: 0,
+      }
+    );
+    if (res.status === 201) {
+      message.success("Add feedback successfully!");
+      await getFeedbacks();
+    }
+  };
 
   const loadMore =
     !initLoading && !loading ? (
@@ -135,7 +152,13 @@ const CommentSection: React.FC<CommentSectionProps> = ({coffeeShopId}) => {
           value={comment}
           onChange={(e) => setComment(e.target.value)}
         />
-        <Button type="primary" onClick={sendFeedbackHandler}>Submit</Button>
+        <Button
+          type="primary"
+          onClick={sendFeedbackHandler}
+          disabled={comment.length == 0}
+        >
+          Submit
+        </Button>
       </Space.Compact>
       <List
         className="demo-loadmore-list"
