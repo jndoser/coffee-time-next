@@ -9,18 +9,29 @@ import {
   useAuth,
 } from "@clerk/nextjs";
 import Search from "antd/es/input/Search";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { setSearchKeywords } from "@/store/slicers/searchKeywordsSlicer";
 import axios from "axios";
 import { setUserInfo } from "@/store/slicers/userInfoSlicer";
+import Title from "antd/es/typography/Title";
 
 const { Header, Content, Footer } = Layout;
 
-const items = new Array(3).fill(null).map((_, index) => ({
-  key: String(index + 1),
-  label: `nav ${index + 1}`,
-}));
+const items = [
+  {
+    key: "home",
+    label: <Title level={5}>Home</Title>,
+  },
+  {
+    key: "browser",
+    label: <Title level={5}>Browser</Title>,
+  },
+  {
+    key: "about-us",
+    label: <Title level={5}>About Us</Title>,
+  },
+];
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -36,6 +47,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   const dispatch = useDispatch();
   const [keywords, setKeywords] = useState("");
   const { userId } = useAuth();
+  const pathname = usePathname();
 
   useEffect(() => {
     const saveUserInfo = async () => {
@@ -61,6 +73,35 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     }, 500);
     return () => clearTimeout(saveSearchKeywords);
   }, [keywords]);
+
+  const clickMenuHandler = ({ key }: any) => {
+    switch (key) {
+      case "home":
+        router.push("/home");
+        break;
+      case "browser":
+        router.push("/");
+        break;
+      case "about-us":
+        router.push("about-us");
+        break;
+      default:
+        router.push("/");
+    }
+  };
+
+  const getSelectedKey = () => {
+    switch (pathname) {
+      case "/":
+        return "browser";
+      case "/home":
+        return "home";
+      case "/about-us":
+        return "about-us";
+      default:
+        return "browser";
+    }
+  };
 
   return (
     <Layout>
@@ -103,9 +144,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           <Menu
             theme="light"
             mode="horizontal"
-            defaultSelectedKeys={["2"]}
+            defaultSelectedKeys={[getSelectedKey()]}
             items={items}
             style={{ minWidth: 0, borderBottom: "none" }}
+            onClick={clickMenuHandler}
           />
           <div>
             <SignedOut>
