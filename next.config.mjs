@@ -10,6 +10,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "os.alipayobjects.com",
       },
+      {
+        protocol: "http",
+        hostname: "res.cloudinary.com",
+      },
     ],
   },
 };
