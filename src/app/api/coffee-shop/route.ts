@@ -10,12 +10,30 @@ export async function GET(req: Request) {
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "5");
     const searchKeywords = searchParams.get("searchKeywords") as string;
+    const userId = searchParams.get("userId") as string;
 
     await connect();
+    let filter: any = {};
+
+    if (userId) {
+      if (!Types.ObjectId.isValid(userId)) {
+        return NextResponse.json(
+          { message: "userId is invalid" },
+          { status: 400 }
+        );
+      }
+      const user = await User.findById(userId);
+      if (!user) {
+        return NextResponse.json(
+          { message: "User not found" },
+          { status: 404 }
+        );
+      }
+      filter.owner = userId;
+    }
 
     const skip = (page - 1) * limit;
 
-    let filter: any = {};
     if (searchKeywords) {
       filter.$or = [
         {

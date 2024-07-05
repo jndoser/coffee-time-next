@@ -1,11 +1,12 @@
 "use client";
 import React from "react";
 import { UploadOutlined } from "@ant-design/icons";
-import { App, Button, Flex, Form, Input, Space, Upload } from "antd";
+import { Button, Flex, Form, Input, Space, Upload } from "antd";
 import Title from "antd/es/typography/Title";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import { useRouter } from "next/navigation";
 
 const formItemLayout = {
   labelCol: { span: 6 },
@@ -48,7 +49,7 @@ const changeFileHandler = ({ file, fileList }: any) => {
 
 const CreateCoffeeShop: React.FC = () => {
   const userId = useSelector((state: RootState) => state.userInfo.id);
-  const { message } = App.useApp();
+  const router = useRouter();
 
   const onFinish = async (values: any) => {
     // https://github.com/jmarioste/next-multiple-file-upload-tutorial/blob/main/app/api/upload/route.ts
@@ -68,7 +69,7 @@ const CreateCoffeeShop: React.FC = () => {
       newCoffeeShop
     );
     if (res.status === 201) {
-      message.success("Registed Coffee Shop successfully");
+      router.push("/success-registration");
     }
   };
   return (
