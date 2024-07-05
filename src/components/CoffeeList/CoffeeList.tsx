@@ -15,7 +15,11 @@ interface CoffeeShopType {
   previewImage: string;
 }
 
-function CoffeeList() {
+interface CoffeeListProps {
+  userId?: string;
+}
+
+function CoffeeList({ userId }: CoffeeListProps) {
   const [coffeeShopList, setCoffeeShopList] = useState<CoffeeShopType[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [loading, setLoading] = useState(false);
@@ -25,9 +29,16 @@ function CoffeeList() {
 
   const getCoffeeShopList = async (page: number, searchKeywords: string) => {
     setLoading(true);
-    const res = await axios.get(
-      `/api/coffee-shop?page=${page}&limit=5&searchKeywords=${searchKeywords}`
-    );
+    let res;
+    if (!userId) {
+      res = await axios.get(
+        `/api/coffee-shop?page=${page}&limit=5&searchKeywords=${searchKeywords}`
+      );
+    } else {
+      res = await axios.get(
+        `/api/coffee-shop?userId=${userId}&page=${page}&limit=5&searchKeywords=${searchKeywords}`
+      );
+    }
     const rawCoffeeShopData = res.data;
     const coffeeShopListData = rawCoffeeShopData.coffeeShops.map(
       (coffeeShop: any) => ({
@@ -71,6 +82,7 @@ function CoffeeList() {
           bio={item.bio}
           previewImage={item.previewImage}
           loading={loading}
+          isOwner={userId ? true: false}
         />
       )}
     />

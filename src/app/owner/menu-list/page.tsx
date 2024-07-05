@@ -1,8 +1,8 @@
 import OwnerLayout from "@/layouts/owner-layout";
 import React from "react";
 
-function Owner() {
+function MenuList() {
   return <OwnerLayout>hello</OwnerLayout>;
 }
 
-export default Owner;
+export default MenuList;

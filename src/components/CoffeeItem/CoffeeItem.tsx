@@ -37,6 +37,7 @@ interface CoffeeItemProps {
   bio: string;
   previewImage: string;
   loading: boolean;
+  isOwner?: boolean;
 }
 
 function CoffeeItem(item: CoffeeItemProps) {
@@ -44,7 +45,10 @@ function CoffeeItem(item: CoffeeItemProps) {
   return (
     <List.Item
       onClick={() => {
-        router.push("/coffee-shop/" + item.id);
+        const url = item.isOwner
+          ? "/owner/menu-list"
+          : "/coffee-shop/" + item.id;
+        router.push(url);
       }}
       key={item.title}
       actions={[
