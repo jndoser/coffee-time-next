@@ -1,9 +1,12 @@
 export {};
 
+export type Roles = "admin" | "owner" | "user";
+
 declare global {
   interface CustomJwtSessionClaims {
     metadata: {
-      role?: "admin" | "owner" | "user";
+      userId?: string;
+      role?: Roles;
     };
   }
 }

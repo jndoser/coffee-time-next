@@ -2,10 +2,9 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
-import MainLayout from "@/layouts/main-layout";
 import { ClerkProvider } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
-import StoreProviderLayout from "@/layouts/store-provider-layout";
+import StoreProviderLayout from "./(common)/layout/store-provider-layout";
 import { App } from "antd";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -21,18 +20,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const { userId } = auth();
-
   return (
     <ClerkProvider>
       <html lang="en">
         <body className={inter.className}>
-          <AntdRegistry>
+          <StoreProviderLayout>
             {userId ? (
-              <StoreProviderLayout>
-                <App>
-                  <MainLayout>{children}</MainLayout>
-                </App>
-              </StoreProviderLayout>
+              <AntdRegistry>
+                <App>{children}</App>
+              </AntdRegistry>
             ) : (
               <div
                 style={{
@@ -45,7 +41,7 @@ export default function RootLayout({
                 {children}
               </div>
             )}
-          </AntdRegistry>
+          </StoreProviderLayout>
         </body>
       </html>
     </ClerkProvider>

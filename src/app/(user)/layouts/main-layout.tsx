@@ -64,7 +64,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({
 
       dispatch(setUserInfo(userInfo));
     };
-    saveUserInfo();
+    if (userId) {
+      saveUserInfo();
+    }
   }, []);
 
   useEffect(() => {

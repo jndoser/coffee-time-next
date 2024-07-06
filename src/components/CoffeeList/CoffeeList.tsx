@@ -45,7 +45,7 @@ function CoffeeList({ userId }: CoffeeListProps) {
         id: coffeeShop._id,
         title: coffeeShop.title,
         address: coffeeShop.address,
-        ownerAvatar: coffeeShop.owner.photo,
+        ownerAvatar: coffeeShop.owner?.photo,
         bio: coffeeShop.bio,
         previewImage: coffeeShop.images[0],
       })
