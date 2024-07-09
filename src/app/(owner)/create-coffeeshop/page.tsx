@@ -53,9 +53,11 @@ const CreateCoffeeShop: React.FC = () => {
 
   const onFinish = async (values: any) => {
     // https://github.com/jmarioste/next-multiple-file-upload-tutorial/blob/main/app/api/upload/route.ts
-    const images = values.upload.map(
-      (file: any) => file.response.responseData[0].url
-    );
+    const images = values.upload.map((file: any) => ({
+      name: file.response.responseData[0].display_name,
+      publicId: file.response.responseData[0].public_id,
+      url: file.response.responseData[0].url,
+    }));
     const newCoffeeShop = {
       title: values.title,
       address: values.address,

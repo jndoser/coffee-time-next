@@ -14,7 +14,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   if (!checkRole("owner")) {
-    redirect("/sign-in");
+    // ßredirect("/sign-in");
   }
 
   return <OwnerLayout>{children}</OwnerLayout>;

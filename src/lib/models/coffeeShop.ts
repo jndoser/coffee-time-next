@@ -5,7 +5,13 @@ const CoffeeShopSchema = new Schema({
   address: { type: String, require: true },
   bio: { type: String, require: true },
   description: { type: String, require: true },
-  images: [{ type: String, require: true }],
+  images: [
+    {
+      name: { type: String, require: true },
+      publicId: { type: String, require: true },
+      url: { type: String, require: true },
+    },
+  ],
   owner: { type: Schema.Types.ObjectId, ref: "User" },
 });
 

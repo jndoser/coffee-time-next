@@ -1,8 +1,13 @@
-import OwnerLayout from "@/layouts/owner-layout";
+import MenuList from "@/components/MenuList/MenuList";
 import React from "react";
 
-function MenuList() {
-  return <OwnerLayout>hello</OwnerLayout>;
+function MenuListPage() {
+  const foodsAndBeverage = [1, 2, 3, 4, 5].map((item) => ({
+    title: `title ${item}`,
+    price: item,
+    image: "hello",
+  }));
+  return <MenuList menus={foodsAndBeverage} />;
 }
 
-export default MenuList;
+export default MenuListPage;

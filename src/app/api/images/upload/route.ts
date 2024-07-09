@@ -13,7 +13,11 @@ export async function POST(req: Request) {
       "nextjs-coffee-images"
     )) as any;
     console.log("response upload image: ", data);
-    responseData.push({ public_id: data.public_id, url: data.url });
+    responseData.push({
+      display_name: data.display_name,
+      public_id: data.public_id,
+      url: data.url,
+    });
   }
 
   return NextResponse.json({ responseData }, { status: 201 });

@@ -47,7 +47,7 @@ function CoffeeList({ userId }: CoffeeListProps) {
         address: coffeeShop.address,
         ownerAvatar: coffeeShop.owner?.photo,
         bio: coffeeShop.bio,
-        previewImage: coffeeShop.images[0],
+        previewImage: coffeeShop.images[0].url,
       })
     );
     setCoffeeShopList(coffeeShopListData);
@@ -57,6 +57,7 @@ function CoffeeList({ userId }: CoffeeListProps) {
 
   useEffect(() => {
     getCoffeeShopList(1, searchKeywords);
+    console.log('searchKeyword: ', searchKeywords);
   }, [searchKeywords]);
 
   return (

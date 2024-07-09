@@ -46,7 +46,7 @@ function CoffeeItem(item: CoffeeItemProps) {
     <List.Item
       onClick={() => {
         const url = item.isOwner
-          ? "/owner/menu-list"
+          ? "/edit-coffeeshop/" + item.id
           : "/coffee-shop/" + item.id;
         router.push(url);
       }}

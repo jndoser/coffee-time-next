@@ -5,8 +5,14 @@ import React, { useState } from "react";
 import CoffeePicturesModal from "../CoffeePicturesModal/CoffeePicturesModal";
 import styles from "./CoffeePicturesSection.module.css";
 
+export interface ImageType {
+  name: string;
+  publicId: string;
+  url: string;
+}
+
 interface CoffeePicturesSectionProps {
-  images: string[];
+  images: ImageType[];
 }
 
 function CoffeePicturesSection({ images }: CoffeePicturesSectionProps) {
@@ -21,7 +27,7 @@ function CoffeePicturesSection({ images }: CoffeePicturesSectionProps) {
     <>
       <Flex gap={2}>
         <Image
-          src={images[0]}
+          src={images[0]?.url}
           alt="test-1"
           width={"50%"}
           height={388}
@@ -34,7 +40,7 @@ function CoffeePicturesSection({ images }: CoffeePicturesSectionProps) {
           {images.slice(1, 7).map((data, index) => (
             <Image
               key={index}
-              src={data}
+              src={data.url}
               alt="test"
               width={200}
               height={192}
@@ -57,7 +63,7 @@ function CoffeePicturesSection({ images }: CoffeePicturesSectionProps) {
         </Flex>
       </Flex>
       <CoffeePicturesModal
-        images={images}
+        images={images.map((image: ImageType) => image.url)}
         isOpen={isOpenModal}
         openModal={openModalHandler}
         closeModal={closeModalHandler}

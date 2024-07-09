@@ -3,7 +3,7 @@ import { Card, Flex, Typography } from "antd";
 import Paragraph from "antd/es/typography/Paragraph";
 import Title from "antd/es/typography/Title";
 import React, { useEffect, useState } from "react";
-import CoffeePicturesSection from "../CoffeePicturesSection/CoffeePicturesSection";
+import CoffeePicturesSection, { ImageType } from "../CoffeePicturesSection/CoffeePicturesSection";
 import MenuCarousel from "../MenuCarousel/MenuCarousel";
 import CommentSection from "../CommentSection/CommentSection";
 import axios from "axios";
@@ -17,7 +17,7 @@ interface CoffeeShopType {
   title: string;
   bio: string;
   description: string;
-  images: string[];
+  images: ImageType[];
 }
 
 function CoffeeDetail({ coffeeShopId }: CoffeeDetailProps) {

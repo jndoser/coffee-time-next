@@ -1,38 +1,29 @@
 "use client";
-import React, { useEffect } from "react";
-import {
-  AppstoreOutlined,
-  BarChartOutlined,
-  CloudOutlined,
-  ShopOutlined,
-  TeamOutlined,
-  UploadOutlined,
-  UserOutlined,
-  VideoCameraOutlined,
-} from "@ant-design/icons";
-import type { MenuProps } from "antd";
+import React, { useEffect, useState } from "react";
 import { Layout, Menu, theme } from "antd";
-import { useAuth } from "@clerk/nextjs";
+import { SignedIn, useAuth, UserButton, useUser } from "@clerk/nextjs";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { setUserInfo } from "@/store/slicers/userInfoSlicer";
+import Search from "antd/es/input/Search";
+import { setSearchKeywords } from "@/store/slicers/searchKeywordsSlicer";
 
 const { Header, Content, Footer, Sider } = Layout;
 
-const items: MenuProps["items"] = [
-  UserOutlined,
-  VideoCameraOutlined,
-  UploadOutlined,
-  BarChartOutlined,
-  CloudOutlined,
-  AppstoreOutlined,
-  TeamOutlined,
-  ShopOutlined,
-].map((icon, index) => ({
-  key: String(index + 1),
-  icon: React.createElement(icon),
-  label: `nav ${index + 1}`,
-}));
+const items = [
+  {
+    key: "all-coffee-shop",
+    label: "All Coffee Shop",
+  },
+  {
+    key: "coffee-detail",
+    label: "Cofee Detail",
+  },
+  {
+    key: "menu-list",
+    label: "Menu List",
+  },
+];
 
 interface OwnerLayoutProps {
   children: React.ReactNode;
@@ -45,6 +36,8 @@ const OwnerLayout: React.FC<OwnerLayoutProps> = ({ children }) => {
 
   const { userId } = useAuth();
   const dispatch = useDispatch();
+  const { user } = useUser();
+  const [keywords, setKeywords] = useState("");
 
   useEffect(() => {
     const saveUserInfo = async () => {
@@ -64,6 +57,13 @@ const OwnerLayout: React.FC<OwnerLayoutProps> = ({ children }) => {
     saveUserInfo();
   }, []);
 
+  useEffect(() => {
+    const saveSearchKeywords = setTimeout(() => {
+      dispatch(setSearchKeywords(keywords));
+    }, 500);
+    return () => clearTimeout(saveSearchKeywords);
+  }, [keywords]);
+
   return (
     <Layout hasSider>
       <Sider
@@ -76,16 +76,41 @@ const OwnerLayout: React.FC<OwnerLayoutProps> = ({ children }) => {
           bottom: 0,
         }}
       >
-        <div className="demo-logo-vertical" />
+        <div className="flex flex-col items-center justify-center py-6">
+          <SignedIn>
+            <UserButton />
+          </SignedIn>
+          <div className="text-white mt-3">
+            {`${user?.firstName} ${user?.lastName}`}{" "}
+          </div>
+        </div>
         <Menu
           theme="dark"
           mode="inline"
-          defaultSelectedKeys={["4"]}
+          defaultSelectedKeys={["all-coffee-shop"]}
           items={items}
         />
       </Sider>
       <Layout style={{ marginLeft: 200 }}>
-        <Header style={{ padding: 0, background: colorBgContainer }} />
+        <Header
+          style={{
+            position: "sticky",
+            top: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 0,
+            background: colorBgContainer,
+            zIndex: 1,
+          }}
+        >
+          <Search
+            placeholder="Input the name ..."
+            style={{ width: "500px", marginTop: "10px", marginBottom: "10px" }}
+            size="large"
+            onChange={(e) => setKeywords(e.target.value)}
+          />
+        </Header>
         <Content style={{ margin: "24px 16px 0", overflow: "initial" }}>
           <div
             style={{
