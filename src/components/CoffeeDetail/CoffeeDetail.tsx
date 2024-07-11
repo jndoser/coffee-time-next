@@ -12,9 +12,10 @@ interface CoffeeDetailProps {
   coffeeShopId: string;
 }
 
-interface CoffeeShopType {
+export interface CoffeeShopType {
   id: string;
   title: string;
+  address: string;
   bio: string;
   description: string;
   images: ImageType[];
@@ -30,6 +31,7 @@ function CoffeeDetail({ coffeeShopId }: CoffeeDetailProps) {
       const coffeeShopData = {
         id: rawCoffeeShopData._id,
         title: rawCoffeeShopData.title,
+        address: rawCoffeeShopData.address,
         bio: rawCoffeeShopData.bio,
         description: rawCoffeeShopData.description,
         images: rawCoffeeShopData.images,

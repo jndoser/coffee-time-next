@@ -1,5 +1,6 @@
 import connect from "@/lib/db";
 import CoffeeShop from "@/lib/models/coffeeShop";
+import User from "@/lib/models/user";
 import { Types } from "mongoose";
 import { NextResponse } from "next/server";
 
@@ -28,6 +29,76 @@ export async function GET(req: Request, context: { params: any }) {
   } catch (error) {
     return NextResponse.json(
       { message: "Error while fetching coffee shop " + error },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(req: Request, context: { params: any }) {
+  try {
+    const { coffeeShopId } = context.params;
+
+    const { searchParams } = new URL(req.url);
+    const userId = searchParams.get("userId");
+
+    if (!userId || !Types.ObjectId.isValid(userId)) {
+      return NextResponse.json(
+        { message: "Invalid or missing userId" },
+        { status: 400 }
+      );
+    }
+
+    if (!coffeeShopId || !Types.ObjectId.isValid(coffeeShopId)) {
+      return NextResponse.json(
+        { message: "Invalid coffeeShopId" },
+        { status: 400 }
+      );
+    }
+
+    await connect();
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return NextResponse.json(
+        { message: "User not found" },
+        {
+          status: 404,
+        }
+      );
+    }
+
+    const coffeeShop = await CoffeeShop.findOne({
+      _id: coffeeShopId,
+      owner: userId,
+    });
+    if (!coffeeShop) {
+      return NextResponse.json(
+        { message: "Not found coffee shop" },
+        { status: 404 }
+      );
+    }
+
+    const body = await req.json();
+    const { title, address, bio, description, images } = body;
+
+    const updatedCoffeeShop = await CoffeeShop.findByIdAndUpdate(
+      coffeeShopId,
+      { title, address, bio, description, images },
+      { new: true }
+    );
+
+    return NextResponse.json(
+      {
+        message: "Coffee shop is updated",
+        category: updatedCoffeeShop,
+      },
+      {
+        status: 200,
+      }
+    );
+  } catch (error) {
+    return NextResponse.json(
+      { message: "Error while updating coffee shop " + error },
       { status: 500 }
     );
   }
