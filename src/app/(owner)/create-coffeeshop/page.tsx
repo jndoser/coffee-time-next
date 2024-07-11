@@ -28,7 +28,6 @@ const removeFileHandler = async (file: any) => {
       ""
     )}`
   );
-  console.log("delete res: ", res.data);
 };
 
 const changeFileHandler = ({ file, fileList }: any) => {
@@ -43,7 +42,6 @@ const changeFileHandler = ({ file, fileList }: any) => {
       public_id: file.response.responseData[0].public_id,
       url: file.response.responseData[0].url,
     }));
-    console.log("file upload response: ", fileUploadResponse);
   }
 };
 

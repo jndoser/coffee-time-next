@@ -10,7 +10,7 @@ import {
   UploadFile,
 } from "antd";
 import Title from "antd/es/typography/Title";
-import { UploadOutlined } from "@ant-design/icons";
+import { UploadOutlined, EditOutlined } from "@ant-design/icons";
 import React, { useEffect, useState } from "react";
 import { CoffeeShopType } from "@/components/CoffeeDetail/CoffeeDetail";
 import axios from "axios";
@@ -184,6 +184,16 @@ function EditCoffeeShopPage({ params: { coffeeShopId } }: Props) {
           </Form.Item>
         </Form>
       )}
+      <Button
+        type="primary"
+        shape="round"
+        icon={<EditOutlined />}
+        size="large"
+        style={{ width: "40%" }}
+        onClick={() => router.push(`/owner/menu-list/${coffeeShopId}`)}
+      >
+        Click to edit Foods & Beverages
+      </Button>
     </Flex>
   );
 }

@@ -12,7 +12,6 @@ export async function POST(req: Request) {
       formDataEntryValue as File,
       "nextjs-coffee-images"
     )) as any;
-    console.log("response upload image: ", data);
     responseData.push({
       display_name: data.display_name,
       public_id: data.public_id,

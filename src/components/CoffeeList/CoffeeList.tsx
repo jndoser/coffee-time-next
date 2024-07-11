@@ -57,7 +57,6 @@ function CoffeeList({ userId }: CoffeeListProps) {
 
   useEffect(() => {
     getCoffeeShopList(1, searchKeywords);
-    console.log('searchKeyword: ', searchKeywords);
   }, [searchKeywords]);
 
   return (
