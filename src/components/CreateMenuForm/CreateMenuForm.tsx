@@ -64,6 +64,7 @@ function CreateMenuForm({
       layout="horizontal"
       style={{ maxWidth: 600 }}
       onFinish={onFinish}
+      initialValues={{ title: "", price: 0, upload: [] }}
     >
       <Form.Item name="title" label="Title">
         <Input />

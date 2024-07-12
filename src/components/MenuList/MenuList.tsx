@@ -61,9 +61,11 @@ function MenuList({ coffeeShopId }: TasksProps) {
         {menus.map((menu: FoodAndBeverageType) => (
           <Col key="title" className="gutter-row" xs={9} sm={7}>
             <MenuItem
+              id={menu.id}
               title={menu.title}
               price={menu.price}
-              image={menu.image.url}
+              image={menu.image}
+              onRefresh={getMenus}
             />
           </Col>
         ))}
