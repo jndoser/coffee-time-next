@@ -14,11 +14,15 @@ const IconText = ({ icon, text }: { icon: React.FC; text: string }) => (
   </Space>
 );
 
-interface FoodAndBeverageType {
+export interface FoodAndBeverageType {
   id: string;
   title: string;
   price: number;
-  image: string;
+  image: {
+    name: string;
+    publicId: string;
+    url: string;
+  };
 }
 
 interface ListBeverageProps {
@@ -37,7 +41,7 @@ const ListBeverage = ({ foodAndBeverages }: ListBeverageProps) => {
             cover={
               <Image
                 alt={foodAndBeverage.title}
-                src={foodAndBeverage.image}
+                src={foodAndBeverage.image.url}
                 width={200}
                 height={200}
               />

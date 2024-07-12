@@ -4,7 +4,12 @@ const FoodBeverageSchema = new Schema(
   {
     title: { type: String, require: true },
     price: { type: Number, require: true },
-    image: { type: String, require: true },
+    image: {
+      name: { type: String, require: true },
+      publicId: { type: String, require: true },
+      url: { type: String, require: true },
+    },
+
     coffeeShop: { type: Schema.Types.ObjectId, ref: "CoffeeShop" },
   },
   {
