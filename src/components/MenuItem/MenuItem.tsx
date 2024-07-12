@@ -4,8 +4,10 @@ import { App, Card, Space } from "antd";
 import Meta from "antd/es/card/Meta";
 import Image from "next/image";
 import { DollarOutlined } from "@ant-design/icons";
-import React from "react";
+import React, { useState } from "react";
 import axios from "axios";
+import CustomModal from "../CustomModal/CustomModal";
+import EditMenuForm from "../EditMenuForm/EditMenuForm";
 
 interface MenuItemProps {
   id: string;
@@ -27,6 +29,7 @@ const IconText = ({ icon, text }: { icon: React.FC; text: string }) => (
 
 function MenuItem({ id, title, price, image, onRefresh }: MenuItemProps) {
   const { message } = App.useApp();
+  const [isShowEditMenuModal, setIsShowEditMenuModal] = useState(false);
 
   const deleteFoodAndBeverage = async () => {
     const deleterRes = await axios.delete(
@@ -37,17 +40,18 @@ function MenuItem({ id, title, price, image, onRefresh }: MenuItemProps) {
     );
     const res = await axios.delete(`/api/food-beverage/${id}`);
     if (deleterRes.status === 200 && res.status === 200) {
-      message.success("Create Menu Successfully");
+      message.success("Delete Menu Successfully");
       onRefresh();
     }
   };
+
   return (
     <Card
       hoverable
       style={{ width: 240, margin: "10px" }}
       cover={<Image alt={title} src={image.url} width={200} height={200} />}
       actions={[
-        <EditOutlined key="edit-task" onClick={() => {}} />,
+        <EditOutlined key="edit-task" onClick={() => setIsShowEditMenuModal(true)} />,
         <DeleteOutlined key="delete-task" onClick={deleteFoodAndBeverage} />,
       ]}
     >
@@ -61,6 +65,21 @@ function MenuItem({ id, title, price, image, onRefresh }: MenuItemProps) {
           />
         }
       />
+      {
+        <CustomModal
+          isOpen={isShowEditMenuModal}
+          onCancel={() => setIsShowEditMenuModal(false)}
+        >
+          <EditMenuForm
+            id={id}
+            title={title}
+            price={price}
+            image={image}
+            onRefresh={onRefresh}
+            onClose={() => setIsShowEditMenuModal(false)}
+          />
+        </CustomModal>
+      }
     </Card>
   );
 }
