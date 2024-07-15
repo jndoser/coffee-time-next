@@ -53,13 +53,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     const saveUserInfo = async () => {
       const rawUserInfo = await axios.get(`/api/user?clerkId=${userId}`);
       const userInfo = {
-        id: rawUserInfo.data._id,
-        clerkId: rawUserInfo.data.clerkId,
-        email: rawUserInfo.data.email,
-        username: rawUserInfo.data.username,
-        photo: rawUserInfo.data.photo,
-        firstName: rawUserInfo.data.firstName,
-        lastName: rawUserInfo.data.lastName,
+        id: rawUserInfo.data.users[0]._id,
+        clerkId: rawUserInfo.data.users[0].clerkId,
+        email: rawUserInfo.data.users[0].email,
+        username: rawUserInfo.data.users[0].username,
+        photo: rawUserInfo.data.users[0].photo,
+        firstName: rawUserInfo.data.users[0].firstName,
+        lastName: rawUserInfo.data.users[0].lastName,
       };
 
       dispatch(setUserInfo(userInfo));

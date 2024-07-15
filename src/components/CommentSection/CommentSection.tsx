@@ -43,7 +43,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ coffeeShopId }) => {
 
   const getFeedbacks = async () => {
     const rawFeedbacks = await axios.get(
-      `/api/feedback?coffeeShopId=66781d3452252c813d848b76&page=${numberOfLoadButtonClick}&limit=${count}`
+      `/api/feedback?coffeeShopId=${coffeeShopId}&page=${numberOfLoadButtonClick}&limit=${count}`
     );
 
     const feedbacksInfo = rawFeedbacks.data;

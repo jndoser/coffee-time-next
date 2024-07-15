@@ -24,6 +24,9 @@ const UserSchema = new Schema({
   lastName: {
     type: String,
   },
+  role: {
+    type: String,
+  },
 });
 
 const User = models?.User || model("User", UserSchema);

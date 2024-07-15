@@ -12,24 +12,24 @@ const { Header, Content, Footer, Sider } = Layout;
 
 const items = [
   {
-    key: "all-coffee-shop",
-    label: "All Coffee Shop",
+    key: "request-owner",
+    label: "Owner User Registration",
   },
   {
-    key: "coffee-detail",
-    label: "Cofee Detail",
+    key: "request-coffee",
+    label: "Coffee Shop Registration",
   },
   {
-    key: "menu-list",
-    label: "Menu List",
+    key: "comments-list",
+    label: "Comments List",
   },
 ];
 
-interface OwnerLayoutProps {
+interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
-const OwnerLayout: React.FC<OwnerLayoutProps> = ({ children }) => {
+const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
@@ -91,7 +91,7 @@ const OwnerLayout: React.FC<OwnerLayoutProps> = ({ children }) => {
           items={items}
         />
       </Sider>
-      <Layout style={{ marginLeft: 200 }}>
+      <Layout style={{ marginLeft: 200, height: "100vh" }}>
         <Header
           style={{
             position: "sticky",
@@ -115,7 +115,7 @@ const OwnerLayout: React.FC<OwnerLayoutProps> = ({ children }) => {
           <div
             style={{
               padding: 24,
-              textAlign: "center",
+              textAlign: "left",
               background: colorBgContainer,
               borderRadius: borderRadiusLG,
             }}
@@ -131,4 +131,4 @@ const OwnerLayout: React.FC<OwnerLayoutProps> = ({ children }) => {
   );
 };
 
-export default OwnerLayout;
+export default AdminLayout;
