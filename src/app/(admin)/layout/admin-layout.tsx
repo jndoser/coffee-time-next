@@ -1,12 +1,16 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Layout, Menu, theme } from "antd";
+import { Layout, Menu, Switch, theme } from "antd";
 import { SignedIn, useAuth, UserButton, useUser } from "@clerk/nextjs";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { setUserInfo } from "@/store/slicers/userInfoSlicer";
 import Search from "antd/es/input/Search";
 import { setSearchKeywords } from "@/store/slicers/searchKeywordsSlicer";
+import {
+  showApprovedList,
+  showPendingApproveList,
+} from "@/store/slicers/adminStateSlicer";
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -64,6 +68,14 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     return () => clearTimeout(saveSearchKeywords);
   }, [keywords]);
 
+  const showApprovedListHandler = (checked: boolean) => {
+    if (checked) {
+      dispatch(showApprovedList());
+    } else {
+      dispatch(showPendingApproveList());
+    }
+  };
+
   return (
     <Layout hasSider>
       <Sider
@@ -102,6 +114,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             padding: 0,
             background: colorBgContainer,
             zIndex: 1,
+            gap: 50,
           }}
         >
           <Search
@@ -109,6 +122,11 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             style={{ width: "500px", marginTop: "10px", marginBottom: "10px" }}
             size="large"
             onChange={(e) => setKeywords(e.target.value)}
+          />
+          <Switch
+            onChange={showApprovedListHandler}
+            checkedChildren="Approved"
+            unCheckedChildren="Pending Approve"
           />
         </Header>
         <Content style={{ margin: "24px 16px 0", overflow: "initial" }}>

@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
-import { Avatar, List, Skeleton, Space } from "antd";
+import { App, Avatar, List, Skeleton, Space } from "antd";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import axios from "axios";
@@ -11,15 +11,17 @@ const IconText = ({
   icon,
   text,
   loading,
+  onClick,
 }: {
   icon: React.FC;
   text: string;
   loading: boolean;
+  onClick: () => void;
 }) => {
   return loading ? (
     <SkeletonButton active shape="round" />
   ) : (
-    <Space className="cursor-pointer">
+    <Space className="cursor-pointer" onClick={onClick}>
       {React.createElement(icon)}
       {text}
     </Space>
@@ -40,14 +42,20 @@ const UserList: React.FC = () => {
   const [users, setUsers] = useState<UserType[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [loading, setLoading] = useState(false);
+  const { message } = App.useApp();
   const searchKeywords = useSelector(
     (state: RootState) => state.searchKeywords.searchKeywords
+  );
+  const isDisplayOwner = useSelector(
+    (state: RootState) => state.adminState.isDisplayOwner
   );
 
   const getUsers = async (page: number, searchKeywords: string) => {
     setLoading(true);
     const res = await axios.get(
-      `/api/user?role=user&page=${page}&limit=5&searchKeywords=${searchKeywords}`
+      `/api/user?role=${
+        isDisplayOwner ? "owner" : "user"
+      }&page=${page}&limit=5&searchKeywords=${searchKeywords}`
     );
     const rawUsersData = res.data;
     const userListData = rawUsersData.users.map((user: any) => ({
@@ -66,7 +74,31 @@ const UserList: React.FC = () => {
 
   useEffect(() => {
     getUsers(1, searchKeywords);
-  }, [searchKeywords]);
+  }, [searchKeywords, isDisplayOwner]);
+
+  const setOwnerRoleForUser = async (userId: string) => {
+    const res = await axios.patch(`/api/user/${userId}`, {
+      action: "SET_ROLE",
+      role: "owner",
+    });
+
+    if (res.status === 200) {
+      message.success("Approve successfully");
+      getUsers(1, "");
+    }
+  };
+
+  const revokeOwnerRoleForUser = async (userId: string) => {
+    const res = await axios.patch(`/api/user/${userId}`, {
+      action: "SET_ROLE",
+      role: "user",
+    });
+
+    if (res.status === 200) {
+      message.success("Revoke successfully");
+      getUsers(1, "");
+    }
+  };
 
   return (
     <List
@@ -83,20 +115,40 @@ const UserList: React.FC = () => {
       renderItem={(user) => (
         <List.Item
           key={user.id}
-          actions={[
-            <IconText
-              icon={CheckCircleOutlined}
-              text="Approve"
-              key="list-vertical-star-o"
-              loading={loading}
-            />,
-            <IconText
-              icon={CloseCircleOutlined}
-              text="Reject"
-              key="list-vertical-like-o"
-              loading={loading}
-            />,
-          ]}
+          actions={
+            !isDisplayOwner
+              ? [
+                  <IconText
+                    icon={CheckCircleOutlined}
+                    text="Approve"
+                    key="list-vertical-star-o"
+                    loading={loading}
+                    onClick={() => {
+                      setOwnerRoleForUser(user.id);
+                    }}
+                  />,
+                  <IconText
+                    icon={CloseCircleOutlined}
+                    text={isDisplayOwner ? "Revoke" : "Reject"}
+                    key="list-vertical-like-o"
+                    loading={loading}
+                    onClick={() => {
+                      setOwnerRoleForUser(user.id);
+                    }}
+                  />,
+                ]
+              : [
+                  <IconText
+                    icon={CloseCircleOutlined}
+                    text={isDisplayOwner ? "Revoke" : "Reject"}
+                    key="list-vertical-like-o"
+                    loading={loading}
+                    onClick={() => {
+                      revokeOwnerRoleForUser(user.id);
+                    }}
+                  />,
+                ]
+          }
         >
           <Skeleton loading={loading} avatar active>
             <List.Item.Meta
