@@ -28,9 +28,9 @@ export async function PATCH(req: Request, context: { params: any }) {
     }
 
     const body = await req.json();
-    const { action, role } = body;
+    const { action } = body;
 
-    if (action.toUpperCase() !== "SET_ROLE") {
+    if (!["SET_ROLE", "REJECT"].includes(action.toUpperCase())) {
       return NextResponse.json(
         { message: "Invalid action value" },
         {
@@ -39,32 +39,45 @@ export async function PATCH(req: Request, context: { params: any }) {
       );
     }
 
-    if (!["admin", "owner", "user"].includes(role.toLowerCase())) {
+    if (action === "SET_ROLE") {
+      const { role } = body;
+      if (!["admin", "owner", "user"].includes(role.toLowerCase())) {
+        return NextResponse.json(
+          { message: "Invalid role value" },
+          {
+            status: 400,
+          }
+        );
+      }
+      const clerkId = user.clerkId;
+      await clerkClient.users.updateUserMetadata(clerkId, {
+        publicMetadata: {
+          role: "owner",
+        },
+      });
+
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { role: role },
+        { new: true }
+      );
       return NextResponse.json(
-        { message: "Invalid role value" },
-        {
-          status: 400,
-        }
+        { message: "Update role successfully", updatedUser },
+        { status: 200 }
       );
     }
 
-    const clerkId = user.clerkId;
-    await clerkClient.users.updateUserMetadata(clerkId, {
-      publicMetadata: {
-        role: "owner",
-      },
-    });
-
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      { role: role },
-      { new: true }
-    );
-
-    return NextResponse.json(
-      { message: "Update role successfully", updatedUser },
-      { status: 200 }
-    );
+    if (action === "REJECT") {
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { isRejected: true },
+        { new: true }
+      );
+      return NextResponse.json(
+        { message: "Rejected successfully", updatedUser },
+        { status: 200 }
+      );
+    }
   } catch (error: any) {
     return NextResponse.json(
       { message: "Error while setting role for this user " + error },

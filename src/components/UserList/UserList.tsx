@@ -55,7 +55,7 @@ const UserList: React.FC = () => {
     const res = await axios.get(
       `/api/user?role=${
         isDisplayOwner ? "owner" : "user"
-      }&page=${page}&limit=5&searchKeywords=${searchKeywords}`
+      }&page=${page}&limit=5&searchKeywords=${searchKeywords}&isRejected=false`
     );
     const rawUsersData = res.data;
     const userListData = rawUsersData.users.map((user: any) => ({
@@ -100,6 +100,17 @@ const UserList: React.FC = () => {
     }
   };
 
+  const rejectOwnerRegistration = async (userId: string) => {
+    const res = await axios.patch(`/api/user/${userId}`, {
+      action: "REJECT",
+    });
+
+    if (res.status === 200) {
+      message.success("Reject successfully");
+      getUsers(1, "");
+    }
+  };
+
   return (
     <List
       itemLayout="horizontal"
@@ -129,18 +140,18 @@ const UserList: React.FC = () => {
                   />,
                   <IconText
                     icon={CloseCircleOutlined}
-                    text={isDisplayOwner ? "Revoke" : "Reject"}
+                    text="Reject"
                     key="list-vertical-like-o"
                     loading={loading}
                     onClick={() => {
-                      setOwnerRoleForUser(user.id);
+                      rejectOwnerRegistration(user.id);
                     }}
                   />,
                 ]
               : [
                   <IconText
                     icon={CloseCircleOutlined}
-                    text={isDisplayOwner ? "Revoke" : "Reject"}
+                    text="Revoke"
                     key="list-vertical-like-o"
                     loading={loading}
                     onClick={() => {

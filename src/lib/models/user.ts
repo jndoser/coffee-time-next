@@ -27,6 +27,9 @@ const UserSchema = new Schema({
   role: {
     type: String,
   },
+  isRejected: {
+    type: Boolean,
+  }
 });
 
 const User = models?.User || model("User", UserSchema);

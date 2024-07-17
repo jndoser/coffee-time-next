@@ -7,6 +7,7 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const clerkId = searchParams.get("clerkId");
     const role = searchParams.get("role");
+    const isRejected = searchParams.get("isRejected");
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "5");
     const searchKeywords = searchParams.get("searchKeywords") as string;
@@ -26,6 +27,8 @@ export async function GET(req: Request) {
       }
       filter.role = role;
     }
+
+    filter.isRejected = isRejected;
 
     const skip = (page - 1) * limit;
 
