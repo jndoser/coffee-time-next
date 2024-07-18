@@ -13,6 +13,8 @@ const CoffeeShopSchema = new Schema({
     },
   ],
   owner: { type: Schema.Types.ObjectId, ref: "User" },
+  isVerified: { type: Boolean, require: true },
+  isRejected: { type: Boolean, require: true },
 });
 
 const CoffeeShop = models?.CoffeeShop || model("CoffeeShop", CoffeeShopSchema);

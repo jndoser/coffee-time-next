@@ -6,6 +6,8 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import axios from "axios";
 import SkeletonButton from "antd/es/skeleton/Button";
+import { CoffeeShopType } from "../CoffeeList/CoffeeList";
+import { useRouter } from "next/navigation";
 
 const IconText = ({
   icon,
@@ -16,7 +18,7 @@ const IconText = ({
   icon: React.FC;
   text: string;
   loading: boolean;
-  onClick: () => void;
+  onClick: (e: any) => void;
 }) => {
   return loading ? (
     <SkeletonButton active shape="round" />
@@ -28,21 +30,12 @@ const IconText = ({
   );
 };
 
-interface UserType {
-  id: string;
-  clerkId: string;
-  email: string;
-  username: string;
-  photo: string;
-  firstName: string;
-  lastName: string;
-}
-
-const UserList: React.FC = () => {
-  const [users, setUsers] = useState<UserType[]>([]);
+const AdminCoffeeList: React.FC = () => {
+  const [coffeeShopList, setCoffeeShopList] = useState<CoffeeShopType[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const { message } = App.useApp();
+  const router = useRouter();
   const searchKeywords = useSelector(
     (state: RootState) => state.searchKeywords.searchKeywords
   );
@@ -53,22 +46,21 @@ const UserList: React.FC = () => {
   const getUsers = async (page: number, searchKeywords: string) => {
     setLoading(true);
     const res = await axios.get(
-      `/api/user?role=${
-        isDisplayApprovedList ? "owner" : "user"
-      }&page=${page}&limit=5&searchKeywords=${searchKeywords}&isRejected=false`
+      `/api/coffee-shop?page=${page}&limit=5&searchKeywords=${searchKeywords}&isVerified=${isDisplayApprovedList}&isRejected=false`
     );
-    const rawUsersData = res.data;
-    const userListData = rawUsersData.users.map((user: any) => ({
-      id: user._id,
-      clerkId: user.clerkId,
-      email: user.email,
-      username: user.username,
-      photo: user.photo,
-      firstName: user.firstName,
-      lastName: user.lastName,
-    }));
-    setUsers(userListData);
-    setTotalCount(rawUsersData.totalCount);
+    const rawCoffeeShopData = res.data;
+    const coffeeShopListData = rawCoffeeShopData.coffeeShops.map(
+      (coffeeShop: any) => ({
+        id: coffeeShop._id,
+        title: coffeeShop.title,
+        address: coffeeShop.address,
+        ownerAvatar: coffeeShop.owner?.photo,
+        bio: coffeeShop.bio,
+        previewImage: coffeeShop.images[0].url,
+      })
+    );
+    setCoffeeShopList(coffeeShopListData);
+    setTotalCount(rawCoffeeShopData.totalCount);
     setLoading(false);
   };
 
@@ -76,10 +68,9 @@ const UserList: React.FC = () => {
     getUsers(1, searchKeywords);
   }, [searchKeywords, isDisplayApprovedList]);
 
-  const setOwnerRoleForUser = async (userId: string) => {
-    const res = await axios.patch(`/api/user/${userId}`, {
-      action: "SET_ROLE",
-      role: "owner",
+  const approveCoffeeShop = async (coffeeShopId: string) => {
+    const res = await axios.patch(`/api/coffee-shop/${coffeeShopId}`, {
+      action: "APPROVE",
     });
 
     if (res.status === 200) {
@@ -88,10 +79,9 @@ const UserList: React.FC = () => {
     }
   };
 
-  const revokeOwnerRoleForUser = async (userId: string) => {
-    const res = await axios.patch(`/api/user/${userId}`, {
-      action: "SET_ROLE",
-      role: "user",
+  const revokeCoffeeShop = async (coffeeShopId: string) => {
+    const res = await axios.patch(`/api/coffee-shop/${coffeeShopId}`, {
+      action: "REVOKE",
     });
 
     if (res.status === 200) {
@@ -100,8 +90,8 @@ const UserList: React.FC = () => {
     }
   };
 
-  const rejectOwnerRegistration = async (userId: string) => {
-    const res = await axios.patch(`/api/user/${userId}`, {
+  const rejectCoffeeShop = async (coffeeShopId: string) => {
+    const res = await axios.patch(`/api/coffee-shop/${coffeeShopId}`, {
       action: "REJECT",
     });
 
@@ -122,10 +112,12 @@ const UserList: React.FC = () => {
         total: totalCount,
         style: { textAlign: "center" },
       }}
-      dataSource={users}
-      renderItem={(user) => (
+      dataSource={coffeeShopList}
+      renderItem={(coffeeShop) => (
         <List.Item
-          key={user.id}
+          className="cursor-pointer"
+          key={coffeeShop.id}
+          onClick={() => router.push(`/coffee-shop/${coffeeShop.id}`)}
           actions={
             !isDisplayApprovedList
               ? [
@@ -134,8 +126,9 @@ const UserList: React.FC = () => {
                     text="Approve"
                     key="list-vertical-star-o"
                     loading={loading}
-                    onClick={() => {
-                      setOwnerRoleForUser(user.id);
+                    onClick={(e: any) => {
+                      e.stopPropagation();
+                      approveCoffeeShop(coffeeShop.id);
                     }}
                   />,
                   <IconText
@@ -143,8 +136,9 @@ const UserList: React.FC = () => {
                     text="Reject"
                     key="list-vertical-like-o"
                     loading={loading}
-                    onClick={() => {
-                      rejectOwnerRegistration(user.id);
+                    onClick={(e: any) => {
+                      e.stopPropagation();
+                      rejectCoffeeShop(coffeeShop.id);
                     }}
                   />,
                 ]
@@ -154,8 +148,9 @@ const UserList: React.FC = () => {
                     text="Revoke"
                     key="list-vertical-like-o"
                     loading={loading}
-                    onClick={() => {
-                      revokeOwnerRoleForUser(user.id);
+                    onClick={(e: any) => {
+                      e.stopPropagation();
+                      revokeCoffeeShop(coffeeShop.id);
                     }}
                   />,
                 ]
@@ -163,13 +158,9 @@ const UserList: React.FC = () => {
         >
           <Skeleton loading={loading} avatar active>
             <List.Item.Meta
-              avatar={<Avatar src={user.photo} />}
-              title={
-                <a>
-                  {user.firstName} {user.lastName}
-                </a>
-              }
-              description={user.email}
+              avatar={<Avatar src={coffeeShop.previewImage} />}
+              title={<a>{coffeeShop.title}</a>}
+              description={coffeeShop.address}
             />
           </Skeleton>
         </List.Item>
@@ -178,4 +169,4 @@ const UserList: React.FC = () => {
   );
 };
 
-export default UserList;
+export default AdminCoffeeList;

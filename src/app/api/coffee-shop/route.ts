@@ -1,6 +1,7 @@
 import connect from "@/lib/db";
 import CoffeeShop from "@/lib/models/coffeeShop";
 import User from "@/lib/models/user";
+import { isRejected } from "@reduxjs/toolkit";
 import { Types } from "mongoose";
 import { NextResponse } from "next/server";
 
@@ -11,6 +12,8 @@ export async function GET(req: Request) {
     const limit = parseInt(searchParams.get("limit") || "5");
     const searchKeywords = searchParams.get("searchKeywords") as string;
     const userId = searchParams.get("userId") as string;
+    const isRejected = searchParams.get("isRejected");
+    const isVerified = searchParams.get("isVerified");
 
     await connect();
     let filter: any = {};
@@ -31,6 +34,9 @@ export async function GET(req: Request) {
       }
       filter.owner = userId;
     }
+
+    filter.isRejected = isRejected;
+    filter.isVerified = isVerified;
 
     const skip = (page - 1) * limit;
 
@@ -97,6 +103,8 @@ export async function POST(req: Request) {
       description,
       images,
       owner: new Types.ObjectId(userId),
+      isVerified: false,
+      isRejected: false,
     });
 
     await newCoffeeShop.save();

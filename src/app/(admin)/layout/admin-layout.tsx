@@ -11,6 +11,7 @@ import {
   showApprovedList,
   showPendingApproveList,
 } from "@/store/slicers/adminStateSlicer";
+import { usePathname } from "next/navigation";
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -41,6 +42,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const { userId } = useAuth();
   const dispatch = useDispatch();
   const { user } = useUser();
+  const pathname = usePathname();
   const [keywords, setKeywords] = useState("");
 
   useEffect(() => {
@@ -67,6 +69,19 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     }, 500);
     return () => clearTimeout(saveSearchKeywords);
   }, [keywords]);
+
+  const getSelectedKey = () => {
+    switch (pathname) {
+      case "/admin/owner-registration":
+        return "request-owner";
+      case "/admin/coffee-shop-registration":
+        return "request-coffee";
+      case "/about-us":
+        return "about-us";
+      default:
+        return "request-owner";
+    }
+  };
 
   const showApprovedListHandler = (checked: boolean) => {
     if (checked) {
@@ -99,7 +114,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         <Menu
           theme="dark"
           mode="inline"
-          defaultSelectedKeys={["all-coffee-shop"]}
+          defaultSelectedKeys={[getSelectedKey()]}
           items={items}
         />
       </Sider>
@@ -125,7 +140,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           />
           <Switch
             onChange={showApprovedListHandler}
-            checkedChildren="Approved"
+            checkedChildren={"Approved"}
             unCheckedChildren="Pending Approve"
           />
         </Header>

@@ -6,7 +6,7 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 
-interface CoffeeShopType {
+export interface CoffeeShopType {
   id: string;
   title: string;
   address: string;
@@ -32,11 +32,11 @@ function CoffeeList({ userId }: CoffeeListProps) {
     let res;
     if (!userId) {
       res = await axios.get(
-        `/api/coffee-shop?page=${page}&limit=5&searchKeywords=${searchKeywords}`
+        `/api/coffee-shop?page=${page}&limit=5&searchKeywords=${searchKeywords}&isVerified=true&isRejected=false`
       );
     } else {
       res = await axios.get(
-        `/api/coffee-shop?userId=${userId}&page=${page}&limit=5&searchKeywords=${searchKeywords}`
+        `/api/coffee-shop?userId=${userId}&page=${page}&limit=5&searchKeywords=${searchKeywords}&isVerified=true&isRejected=false`
       );
     }
     const rawCoffeeShopData = res.data;
@@ -82,7 +82,7 @@ function CoffeeList({ userId }: CoffeeListProps) {
           bio={item.bio}
           previewImage={item.previewImage}
           loading={loading}
-          isOwner={userId ? true: false}
+          isOwner={userId ? true : false}
         />
       )}
     />

@@ -1,11 +1,11 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 export interface AdminState {
-  isDisplayOwner: boolean;
+  isDisplayApprovedList: boolean;
 }
 
 const initialState: AdminState = {
-  isDisplayOwner: false,
+  isDisplayApprovedList: false,
 };
 
 export const adminSlice = createSlice({
@@ -13,10 +13,10 @@ export const adminSlice = createSlice({
   initialState,
   reducers: {
     showApprovedList: (state) => {
-      state.isDisplayOwner = true;
+      state.isDisplayApprovedList = true;
     },
     showPendingApproveList: (state) => {
-      state.isDisplayOwner = false;
+      state.isDisplayApprovedList = false;
     },
   },
 });
