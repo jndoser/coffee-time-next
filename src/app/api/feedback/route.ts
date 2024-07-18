@@ -11,6 +11,8 @@ export async function GET(req: Request) {
     const coffeeShopId = searchParams.get("coffeeShopId");
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "3");
+    const searchKeywords = searchParams.get("searchKeywords") as string;
+    const isHide = searchParams.get("isHide");
 
     if (!coffeeShopId || !Types.ObjectId.isValid(coffeeShopId)) {
       return NextResponse.json(
@@ -29,18 +31,30 @@ export async function GET(req: Request) {
       );
     }
 
+    let filter: any = {};
+    filter.coffeeShop = coffeeShopId;
+    filter.isHide = isHide;
+
+    if (searchKeywords) {
+      filter.$or = [
+        {
+          description: { $regex: searchKeywords, $options: "i" },
+        },
+      ];
+    }
+
     const skip = (page - 1) * limit;
 
-    const feedbacks = await Feedback.find({
-      coffeeShop: coffeeShopId,
-    })
+    const feedbacks = await Feedback.find(filter)
       .sort({
         createdAt: "desc",
       })
       .skip(skip)
       .limit(limit)
       .populate("owner");
-    return NextResponse.json(feedbacks, { status: 200 });
+
+    const totalCount = await Feedback.countDocuments(filter);
+    return NextResponse.json({ feedbacks, totalCount }, { status: 200 });
   } catch (error: any) {
     return NextResponse.json(
       { message: "Error while fetching feedback " + error },
@@ -96,6 +110,7 @@ export async function POST(req: Request) {
       numberOfDownvote,
       owner: userId,
       coffeeShop: coffeeShopId,
+      isHide: false,
     });
 
     await newFeedback.save();

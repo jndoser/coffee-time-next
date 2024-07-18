@@ -1,6 +1,10 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
+import {
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  FileSearchOutlined,
+} from "@ant-design/icons";
 import { App, Avatar, List, Skeleton, Space } from "antd";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
@@ -151,6 +155,18 @@ const AdminCoffeeList: React.FC = () => {
                     onClick={(e: any) => {
                       e.stopPropagation();
                       revokeCoffeeShop(coffeeShop.id);
+                    }}
+                  />,
+                  <IconText
+                    icon={FileSearchOutlined}
+                    text="Manage Feedbacks"
+                    key="list-vertical-like-o"
+                    loading={loading}
+                    onClick={(e: any) => {
+                      e.stopPropagation();
+                      router.push(
+                        `/admin/feedbacks-management/${coffeeShop.id}`
+                      );
                     }}
                   />,
                 ]

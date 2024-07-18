@@ -33,7 +33,7 @@ interface CommentSectionProps {
 const CommentSection: React.FC<CommentSectionProps> = ({ coffeeShopId }) => {
   const [initLoading, setInitLoading] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [numberOfLoadButtonClick, setNumberOfLoadButtonClick] = useState(1);
+  const [numberOfLoadButtonClick, setNumberOfLoadButtonClick] = useState(2);
   const [data, setData] = useState<DataType[]>([]);
   const [list, setList] = useState<DataType[]>([]);
   const [comment, setComment] = useState("");
@@ -43,11 +43,11 @@ const CommentSection: React.FC<CommentSectionProps> = ({ coffeeShopId }) => {
 
   const getFeedbacks = async () => {
     const rawFeedbacks = await axios.get(
-      `/api/feedback?coffeeShopId=${coffeeShopId}&page=${numberOfLoadButtonClick}&limit=${count}`
+      `/api/feedback?coffeeShopId=${coffeeShopId}&page=1&limit=${count}&isHide=false`
     );
 
     const feedbacksInfo = rawFeedbacks.data;
-    const feedbackData = feedbacksInfo.map((feedback: any) => ({
+    const feedbackData = feedbacksInfo.feedbacks.map((feedback: any) => ({
       name: {
         first: feedback.owner.firstName,
         last: feedback.owner.lastName,
@@ -83,11 +83,11 @@ const CommentSection: React.FC<CommentSectionProps> = ({ coffeeShopId }) => {
     );
 
     const rawFeedbacks = await axios.get(
-      `/api/feedback?coffeeShopId=66781d3452252c813d848b76&page=${numberOfLoadButtonClick}&limit=${count}`
+      `/api/feedback?coffeeShopId=${coffeeShopId}&page=${numberOfLoadButtonClick}&limit=${count}&isHide=false`
     );
 
     const feedbacksInfo = rawFeedbacks.data;
-    const feedbackData = feedbacksInfo.map((feedback: any) => ({
+    const feedbackData = feedbacksInfo.feedbacks.map((feedback: any) => ({
       name: {
         first: feedback.owner.firstName,
         last: feedback.owner.lastName,
@@ -176,7 +176,11 @@ const CommentSection: React.FC<CommentSectionProps> = ({ coffeeShopId }) => {
             <Skeleton avatar title={false} loading={item.loading} active>
               <List.Item.Meta
                 avatar={<Avatar src={item.picture.large} />}
-                title={<a href="https://ant.design">{item.name?.last}</a>}
+                title={
+                  <a href="https://ant.design">
+                    {item.name?.first} {item.name?.last}
+                  </a>
+                }
                 description={item.description}
               />
             </Skeleton>

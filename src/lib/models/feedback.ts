@@ -7,6 +7,7 @@ const FeedbackSchema = new Schema(
     numberOfDownvote: { type: Number, require: true, default: 0 },
     owner: { type: Schema.Types.ObjectId, ref: "User" },
     coffeeShop: { type: Schema.Types.ObjectId, ref: "CoffeeShop" },
+    isHide: { type: Boolean, require: true },
   },
   {
     timestamps: true,
