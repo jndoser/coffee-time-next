@@ -39,12 +39,20 @@ const ListBeverage = ({ foodAndBeverages }: ListBeverageProps) => {
             hoverable
             style={{ width: 240, margin: "10px" }}
             cover={
-              <Image
-                alt={foodAndBeverage.title}
-                src={foodAndBeverage.image.url}
-                width={200}
-                height={200}
-              />
+              <div
+                style={{
+                  position: "relative",
+                  width: "240px",
+                  height: "200px",
+                }}
+              >
+                <Image
+                  alt={foodAndBeverage.title}
+                  src={foodAndBeverage.image.url}
+                  fill
+                  style={{ objectFit: "cover" }}
+                />
+              </div>
             }
           >
             <Meta

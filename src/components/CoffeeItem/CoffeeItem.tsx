@@ -75,13 +75,16 @@ function CoffeeItem(item: CoffeeItemProps) {
         item.loading ? (
           <SkeletonImage active />
         ) : (
-          <Image
-            width={272}
-            height={100}
-            alt="preview-coffee-shop-image"
-            src={item.previewImage}
-            style={{ borderRadius: "16px" }}
-          />
+          <div
+            style={{ position: "relative", width: "272px", height: "130px" }}
+          >
+            <Image
+              fill
+              alt="preview-coffee-shop-image"
+              src={item.previewImage}
+              style={{ borderRadius: "16px", objectFit: "cover" }}
+            />
+          </div>
         )
       }
       style={{

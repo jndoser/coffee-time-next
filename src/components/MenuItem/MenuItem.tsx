@@ -49,9 +49,21 @@ function MenuItem({ id, title, price, image, onRefresh }: MenuItemProps) {
     <Card
       hoverable
       style={{ width: 240, margin: "10px" }}
-      cover={<Image alt={title} src={image.url} width={200} height={200} />}
+      cover={
+        <div style={{ position: "relative", width: "240px", height: "200px" }}>
+          <Image
+            alt={title}
+            src={image.url}
+            fill
+            style={{ objectFit: "cover" }}
+          />
+        </div>
+      }
       actions={[
-        <EditOutlined key="edit-task" onClick={() => setIsShowEditMenuModal(true)} />,
+        <EditOutlined
+          key="edit-task"
+          onClick={() => setIsShowEditMenuModal(true)}
+        />,
         <DeleteOutlined key="delete-task" onClick={deleteFoodAndBeverage} />,
       ]}
     >

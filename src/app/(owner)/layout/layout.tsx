@@ -115,7 +115,7 @@ const OwnerLayout: React.FC<OwnerLayoutProps> = ({ children }) => {
           <div
             style={{
               padding: 24,
-              textAlign: "center",
+              textAlign: "left",
               background: colorBgContainer,
               borderRadius: borderRadiusLG,
             }}
