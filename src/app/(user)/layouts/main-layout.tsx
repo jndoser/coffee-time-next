@@ -31,6 +31,10 @@ const items = [
     key: "about-us",
     label: <Title level={5}>About Us</Title>,
   },
+  {
+    key: "search-coffee-shop",
+    label: <Title level={5}>Maps</Title>,
+  },
 ];
 
 interface MainLayoutProps {
@@ -87,6 +91,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       case "about-us":
         router.push("about-us");
         break;
+      case "search-coffee-shop":
+        router.push("/search-coffee-shop");
+        break;
       default:
         router.push("/");
     }
@@ -100,6 +107,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         return "home";
       case "/about-us":
         return "about-us";
+      case "/search-coffee-shop":
+        return "search-coffee-shop";
       default:
         return "browser";
     }

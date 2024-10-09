@@ -12,6 +12,7 @@
     "@ant-design/nextjs-registry": "^1.0.0",
     "@clerk/nextjs": "^5.1.5",
     "@reduxjs/toolkit": "^2.2.6",
+    "@vis.gl/react-google-maps": "^1.1.0",
     "antd": "^5.18.1",
     "axios": "^1.7.2",
     "cloudinary": "^2.2.0",
