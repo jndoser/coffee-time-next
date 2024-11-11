@@ -5,6 +5,7 @@ import Title from "antd/es/typography/Title";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import { DownOutlined } from "@ant-design/icons";
 
 interface DataType {
   gender?: string;
@@ -137,25 +138,40 @@ const CommentSection: React.FC<CommentSectionProps> = ({ coffeeShopId }) => {
           lineHeight: "32px",
         }}
       >
-        <Button onClick={onLoadMore}>loading more</Button>
+        <Button
+          icon={<DownOutlined />}
+          onClick={onLoadMore}
+          style={{ borderRadius: "16px" }}
+        >
+          See more
+        </Button>
       </div>
     ) : null;
 
   return (
-    <div>
+    <div className="flex flex-col">
       <Title level={3}>Feedbacks</Title>
       <Space.Compact
-        style={{ width: "60%", marginTop: "20px", marginBottom: "20px" }}
+        style={{
+          width: "60%",
+          marginTop: "20px",
+          marginBottom: "20px",
+          height: "50px",
+          gap: "10px",
+          alignSelf: "center",
+        }}
       >
         <Input
           defaultValue="Leave your feedback ..."
           value={comment}
           onChange={(e) => setComment(e.target.value)}
+          style={{ borderRadius: "16px" }}
         />
         <Button
           type="primary"
           onClick={sendFeedbackHandler}
           disabled={comment.length == 0}
+          style={{ height: "100%", borderRadius: "16px" }}
         >
           Submit
         </Button>
