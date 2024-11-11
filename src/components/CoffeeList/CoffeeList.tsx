@@ -63,14 +63,19 @@ function CoffeeList({ userId }: CoffeeListProps) {
     <List
       itemLayout="vertical"
       size="large"
-      pagination={{
-        onChange: async (page) => {
-          await getCoffeeShopList(page, "");
-        },
-        pageSize: 5,
-        total: totalCount,
-        style: { textAlign: "center" },
-      }}
+      pagination={
+        totalCount > 5
+          ? {
+              onChange: async (page) => {
+                await getCoffeeShopList(page, "");
+              },
+              pageSize: 5,
+              total: totalCount,
+              style: { textAlign: "center" },
+            }
+          : undefined
+      }
+      style={totalCount < 4 ? { height: "100vh" } : {}}
       dataSource={coffeeShopList}
       renderItem={(item: CoffeeShopType) => (
         <CoffeeItem
