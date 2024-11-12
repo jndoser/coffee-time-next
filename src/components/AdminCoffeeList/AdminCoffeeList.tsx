@@ -10,7 +10,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import axios from "axios";
 import SkeletonButton from "antd/es/skeleton/Button";
-import { CoffeeShopType } from "../CoffeeList/CoffeeList";
+import { CoffeeShopWithPreview } from "../CoffeeList/CoffeeList";
 import { useRouter } from "next/navigation";
 
 const IconText = ({
@@ -35,7 +35,7 @@ const IconText = ({
 };
 
 const AdminCoffeeList: React.FC = () => {
-  const [coffeeShopList, setCoffeeShopList] = useState<CoffeeShopType[]>([]);
+  const [coffeeShopList, setCoffeeShopList] = useState<CoffeeShopWithPreview[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const { message } = App.useApp();
