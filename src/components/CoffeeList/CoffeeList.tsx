@@ -1,10 +1,11 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { List } from "antd";
 import CoffeeItem from "../CoffeeItem/CoffeeItem";
-import axios from "axios";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import { useQuery, QueryKey } from "@tanstack/react-query";
+import axios from "axios";
 
 export interface CoffeeShopType {
   id: string;
@@ -12,6 +13,10 @@ export interface CoffeeShopType {
   address: string;
   ownerAvatar: string;
   bio: string;
+  images: { url: string }[];
+}
+
+export interface CoffeeShopWithPreview extends Omit<CoffeeShopType, "images"> {
   previewImage: string;
 }
 
@@ -19,45 +24,54 @@ interface CoffeeListProps {
   userId?: string;
 }
 
+interface CoffeeShopResponse {
+  coffeeShops: CoffeeShopType[];
+  totalCount: number;
+}
+
+const fetchCoffeeShops = async ({
+  queryKey,
+}: {
+  queryKey: QueryKey;
+}): Promise<CoffeeShopResponse> => {
+  const [_, page, searchKeywords, userId] = queryKey as [
+    string,
+    number,
+    string,
+    string?
+  ]; // Type assertion to cast queryKey
+
+  const url = userId
+    ? `/api/coffee-shop?userId=${userId}&page=${page}&limit=5&searchKeywords=${searchKeywords}&isVerified=true&isRejected=false`
+    : `/api/coffee-shop?page=${page}&limit=5&searchKeywords=${searchKeywords}&isVerified=true&isRejected=false`;
+
+  const res = await axios.get<CoffeeShopResponse>(url);
+  return res.data;
+};
+
 function CoffeeList({ userId }: CoffeeListProps) {
-  const [coffeeShopList, setCoffeeShopList] = useState<CoffeeShopType[]>([]);
-  const [totalCount, setTotalCount] = useState<number>(0);
-  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const searchKeywords = useSelector(
     (state: RootState) => state.searchKeywords.searchKeywords
   );
 
-  const getCoffeeShopList = async (page: number, searchKeywords: string) => {
-    setLoading(true);
-    let res;
-    if (!userId) {
-      res = await axios.get(
-        `/api/coffee-shop?page=${page}&limit=5&searchKeywords=${searchKeywords}&isVerified=true&isRejected=false`
-      );
-    } else {
-      res = await axios.get(
-        `/api/coffee-shop?userId=${userId}&page=${page}&limit=5&searchKeywords=${searchKeywords}&isVerified=true&isRejected=false`
-      );
-    }
-    const rawCoffeeShopData = res.data;
-    const coffeeShopListData = rawCoffeeShopData.coffeeShops.map(
-      (coffeeShop: any) => ({
-        id: coffeeShop._id,
-        title: coffeeShop.title,
-        address: coffeeShop.address,
-        ownerAvatar: coffeeShop.owner?.photo,
-        bio: coffeeShop.bio,
-        previewImage: coffeeShop.images[0].url,
-      })
-    );
-    setCoffeeShopList(coffeeShopListData);
-    setTotalCount(rawCoffeeShopData.totalCount);
-    setLoading(false);
-  };
+  const { data, isLoading } = useQuery<CoffeeShopResponse>({
+    queryKey: ["coffeeShops", currentPage, searchKeywords, userId],
+    queryFn: fetchCoffeeShops,
+    staleTime: 3000,
+  });
 
-  useEffect(() => {
-    getCoffeeShopList(1, searchKeywords);
-  }, [searchKeywords]);
+  const coffeeShopList: CoffeeShopWithPreview[] =
+    data?.coffeeShops.map((coffeeShop) => ({
+      id: coffeeShop.id,
+      title: coffeeShop.title,
+      address: coffeeShop.address,
+      ownerAvatar: coffeeShop.ownerAvatar,
+      bio: coffeeShop.bio,
+      previewImage: coffeeShop.images[0].url,
+    })) || [];
+
+  const totalCount: number = data?.totalCount || 0;
 
   return (
     <List
@@ -66,9 +80,8 @@ function CoffeeList({ userId }: CoffeeListProps) {
       pagination={
         totalCount > 5
           ? {
-              onChange: async (page) => {
-                await getCoffeeShopList(page, "");
-              },
+              current: currentPage,
+              onChange: (page) => setCurrentPage(page),
               pageSize: 5,
               total: totalCount,
               style: { textAlign: "center" },
@@ -77,7 +90,7 @@ function CoffeeList({ userId }: CoffeeListProps) {
       }
       style={totalCount < 4 ? { height: "100vh" } : {}}
       dataSource={coffeeShopList}
-      renderItem={(item: CoffeeShopType) => (
+      renderItem={(item: CoffeeShopWithPreview) => (
         <CoffeeItem
           key={item.id}
           id={item.id}
@@ -86,8 +99,8 @@ function CoffeeList({ userId }: CoffeeListProps) {
           address={item.address}
           bio={item.bio}
           previewImage={item.previewImage}
-          loading={loading}
-          isOwner={userId ? true : false}
+          loading={isLoading}
+          isOwner={Boolean(userId)}
         />
       )}
     />

@@ -1,7 +1,7 @@
+import { getUserId } from "@/app/utils/roles";
 import connect from "@/lib/db";
 import CoffeeShop from "@/lib/models/coffeeShop";
 import User from "@/lib/models/user";
-import { isRejected } from "@reduxjs/toolkit";
 import { Types } from "mongoose";
 import { NextResponse } from "next/server";
 
@@ -14,6 +14,17 @@ export async function GET(req: Request) {
     const userId = searchParams.get("userId") as string;
     const isRejected = searchParams.get("isRejected");
     const isVerified = searchParams.get("isVerified");
+
+    const loggedInUserId = getUserId();
+
+    if (!loggedInUserId) {
+      return NextResponse.json(
+        {
+          message: "Unauthorized",
+        },
+        { status: 401 }
+      );
+    }
 
     await connect();
     let filter: any = {};
@@ -35,8 +46,8 @@ export async function GET(req: Request) {
       filter.owner = userId;
     }
 
-    filter.isRejected = isRejected;
-    filter.isVerified = isVerified;
+    filter.isRejected = isRejected === "true";
+    filter.isVerified = isVerified === "true";
 
     const skip = (page - 1) * limit;
 
@@ -51,10 +62,99 @@ export async function GET(req: Request) {
       ];
     }
 
-    const coffeeShops = await CoffeeShop.find(filter)
-      .skip(skip)
-      .limit(limit)
-      .populate("owner");
+    const coffeeShops = await CoffeeShop.aggregate([
+      { $match: filter },
+      { $skip: skip },
+      { $limit: limit },
+      {
+        $lookup: {
+          from: "users",
+          localField: "owner",
+          foreignField: "_id",
+          as: "owner",
+        },
+      },
+      {
+        $unwind: {
+          path: "$owner",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "likecoffeeshops", // Ensure this matches the actual collection name for likes
+          localField: "_id",
+          foreignField: "coffeeShop",
+          as: "likes",
+        },
+      },
+      {
+        $addFields: {
+          likeCount: {
+            $cond: {
+              if: { $gt: [{ $size: "$likes" }, 0] },
+              then: { $size: "$likes" },
+              else: 0,
+            },
+          },
+        },
+      },
+      {
+        // Second lookup to check if the specific user has liked the CoffeeShop
+        $lookup: {
+          from: "likecoffeeshops",
+          let: { coffeeShopId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$coffeeShop", "$$coffeeShopId"] },
+                    { $eq: ["$user", new Types.ObjectId(loggedInUserId)] },
+                  ],
+                },
+              },
+            },
+            { $limit: 1 }, // Limit to 1 to only check for existence
+          ],
+          as: "userLike",
+        },
+      },
+      {
+        // Determine if the user has liked the CoffeeShop
+        $addFields: {
+          isLiked: {
+            $cond: {
+              if: { $gt: [{ $size: "$userLike" }, 0] },
+              then: true,
+              else: false,
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          title: 1,
+          bio: 1,
+          address: 1,
+          description: 1,
+          owner: {
+            email: 1,
+            username: 1,
+            photo: 1,
+            firstName: 1,
+            lastName: 1,
+            role: 1,
+            isRejected: 1,
+          },
+          isVerified: 1,
+          isRejected: 1,
+          images: 1,
+          likeCount: 1,
+          isLiked: 1,
+        },
+      },
+    ]);
 
     const totalCount = await CoffeeShop.countDocuments(filter);
 

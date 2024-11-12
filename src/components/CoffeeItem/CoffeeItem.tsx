@@ -10,20 +10,23 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import SkeletonButton from "antd/es/skeleton/Button";
 import SkeletonImage from "antd/es/skeleton/Image";
+import axios from "axios";
 
 const IconText = ({
   icon,
   text,
   loading,
+  clickHandler,
 }: {
   icon: React.FC;
   text: string;
   loading?: boolean;
+  clickHandler?: () => void;
 }) =>
   loading ? (
     <SkeletonButton active shape="round" />
   ) : (
-    <Space>
+    <Space onClick={clickHandler}>
       {React.createElement(icon)}
       {text}
     </Space>
@@ -42,6 +45,9 @@ interface CoffeeItemProps {
 
 function CoffeeItem(item: CoffeeItemProps) {
   const router = useRouter();
+  const likeThisCoffeeShop = async () => {
+    await axios.post("/api/coffee-shop/" + item.id + "/likes");
+  }
   return (
     <List.Item
       onClick={() => {
@@ -63,6 +69,7 @@ function CoffeeItem(item: CoffeeItemProps) {
           text="156"
           key="list-vertical-like-o"
           loading={item.loading}
+          clickHandler={() => likeThisCoffeeShop()} 
         />,
         <IconText
           icon={MessageOutlined}
