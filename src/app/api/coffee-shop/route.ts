@@ -134,6 +134,7 @@ export async function GET(req: Request) {
       },
       {
         $project: {
+          _id: 1,
           title: 1,
           bio: 1,
           address: 1,

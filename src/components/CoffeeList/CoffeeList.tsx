@@ -8,15 +8,19 @@ import { useQuery, QueryKey } from "@tanstack/react-query";
 import axios from "axios";
 
 export interface CoffeeShopType {
-  id: string;
+  _id: string;
   title: string;
   address: string;
   ownerAvatar: string;
   bio: string;
   images: { url: string }[];
+  likeCount: number;
+  isLiked: boolean;
 }
 
-export interface CoffeeShopWithPreview extends Omit<CoffeeShopType, "images"> {
+export interface CoffeeShopWithPreview
+  extends Omit<CoffeeShopType, "images" | "_id"> {
+  id: string;
   previewImage: string;
 }
 
@@ -63,12 +67,14 @@ function CoffeeList({ userId }: CoffeeListProps) {
 
   const coffeeShopList: CoffeeShopWithPreview[] =
     data?.coffeeShops.map((coffeeShop) => ({
-      id: coffeeShop.id,
+      id: coffeeShop._id,
       title: coffeeShop.title,
       address: coffeeShop.address,
       ownerAvatar: coffeeShop.ownerAvatar,
       bio: coffeeShop.bio,
       previewImage: coffeeShop.images[0].url,
+      likeCount: coffeeShop.likeCount,
+      isLiked: coffeeShop.isLiked,
     })) || [];
 
   const totalCount: number = data?.totalCount || 0;
@@ -101,6 +107,8 @@ function CoffeeList({ userId }: CoffeeListProps) {
           previewImage={item.previewImage}
           loading={isLoading}
           isOwner={Boolean(userId)}
+          likes={item.likeCount}
+          isLikedByUser={item.isLiked}
         />
       )}
     />

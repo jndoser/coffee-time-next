@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import SkeletonButton from "antd/es/skeleton/Button";
 import SkeletonImage from "antd/es/skeleton/Image";
 import axios from "axios";
+import LikeIconButton from "./LikeIconButton/LikeIconButton";
 
 const IconText = ({
   icon,
@@ -41,13 +42,12 @@ interface CoffeeItemProps {
   previewImage: string;
   loading: boolean;
   isOwner?: boolean;
+  likes: number;
+  isLikedByUser: boolean;
 }
 
 function CoffeeItem(item: CoffeeItemProps) {
   const router = useRouter();
-  const likeThisCoffeeShop = async () => {
-    await axios.post("/api/coffee-shop/" + item.id + "/likes");
-  }
   return (
     <List.Item
       onClick={() => {
@@ -64,12 +64,13 @@ function CoffeeItem(item: CoffeeItemProps) {
           key="list-vertical-star-o"
           loading={item.loading}
         />,
-        <IconText
-          icon={LikeOutlined}
-          text="156"
-          key="list-vertical-like-o"
-          loading={item.loading}
-          clickHandler={() => likeThisCoffeeShop()} 
+        <LikeIconButton
+          key="like-coffee-shop-action"
+          coffeeShopId={item.id}
+          initialState={{
+            likes: item.likes,
+            isLikedByUser: item.isLikedByUser,
+          }}
         />,
         <IconText
           icon={MessageOutlined}
