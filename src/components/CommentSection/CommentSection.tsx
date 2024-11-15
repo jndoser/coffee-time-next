@@ -1,152 +1,72 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { App, Avatar, Button, Input, List, Skeleton, Space } from "antd";
 import Title from "antd/es/typography/Title";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { useSelector } from "react-redux";
-import { RootState } from "@/store/store";
 import { DownOutlined } from "@ant-design/icons";
+import { useSubmitCommentMutation } from "./mutation";
 
-interface DataType {
-  gender?: string;
-  name: {
-    title?: string;
-    first?: string;
-    last?: string;
-  };
-  email?: string;
-  picture: {
-    large?: string;
-    medium?: string;
-    thumbnail?: string;
-  };
-  description?: string;
-  nat?: string;
-  loading: boolean;
+interface APIResponse {
+  feedbacks: any[];
+  nextCursor: string | null;
 }
-
-const count = 3;
 
 interface CommentSectionProps {
   coffeeShopId: string;
 }
 
 const CommentSection: React.FC<CommentSectionProps> = ({ coffeeShopId }) => {
-  const [initLoading, setInitLoading] = useState(true);
-  const [loading, setLoading] = useState(false);
-  const [numberOfLoadButtonClick, setNumberOfLoadButtonClick] = useState(2);
-  const [data, setData] = useState<DataType[]>([]);
-  const [list, setList] = useState<DataType[]>([]);
   const [comment, setComment] = useState("");
-  const userId = useSelector((state: RootState) => state.userInfo.id);
-
   const { message } = App.useApp();
 
-  const getFeedbacks = async () => {
-    const rawFeedbacks = await axios.get(
-      `/api/feedback?coffeeShopId=${coffeeShopId}&page=1&limit=${count}&isHide=false`
+  // Infinite query for fetching feedbacks
+  const fetchFeedbacks = async ({
+    pageParam = null,
+  }: {
+    pageParam?: string | null;
+  }) => {
+    const response = await axios.get<APIResponse>(
+      `/api/feedback?coffeeShopId=${coffeeShopId}&isHide=false`,
+      { params: { cursor: pageParam } }
     );
-
-    const feedbacksInfo = rawFeedbacks.data;
-    const feedbackData = feedbacksInfo.feedbacks.map((feedback: any) => ({
-      name: {
-        first: feedback.owner.firstName,
-        last: feedback.owner.lastName,
-      },
-      picture: {
-        large: feedback.owner.photo,
-        medium: feedback.owner.photo,
-        thumnail: feedback.owner.photo,
-      },
-      description: feedback.description,
-      email: feedback.owner.email,
-    }));
-
-    setInitLoading(false);
-    setData(feedbackData);
-    setList(feedbackData);
+    return response.data;
   };
 
-  useEffect(() => {
-    getFeedbacks();
-  }, []);
+  const { data, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: ["comments", coffeeShopId],
+      queryFn: fetchFeedbacks,
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+      initialPageParam: null as string | null, // Set null as the initial value for cursor
+    });
 
-  const onLoadMore = async () => {
-    setLoading(true);
-    setList(
-      data.concat(
-        [...new Array(count)].map(() => ({
-          loading: true,
-          name: {},
-          picture: {},
-        }))
-      )
-    );
-
-    const rawFeedbacks = await axios.get(
-      `/api/feedback?coffeeShopId=${coffeeShopId}&page=${numberOfLoadButtonClick}&limit=${count}&isHide=false`
-    );
-
-    const feedbacksInfo = rawFeedbacks.data;
-    const feedbackData = feedbacksInfo.feedbacks.map((feedback: any) => ({
-      name: {
-        first: feedback.owner.firstName,
-        last: feedback.owner.lastName,
-      },
-      picture: {
-        large: feedback.owner.photo,
-        medium: feedback.owner.photo,
-        thumnail: feedback.owner.photo,
-      },
-      description: feedback.description,
-      email: feedback.owner.email,
-    }));
-
-    const newData = data.concat(feedbackData);
-    setData(newData);
-    setList(newData);
-    setLoading(false);
-    setNumberOfLoadButtonClick((prevState) => prevState + 1);
-    // Resetting window's offsetTop so as to display react-virtualized demo underfloor.
-    // In real scene, you can using public method of react-virtualized:
-    // https://stackoverflow.com/questions/46700726/how-to-use-public-method-updateposition-of-react-virtualized
-    window.dispatchEvent(new Event("resize"));
-  };
+  // Mutation for submitting new feedback
+  const submitCommentMutation = useSubmitCommentMutation();
 
   const sendFeedbackHandler = async () => {
-    const res = await axios.post(
-      `/api/feedback?coffeeShopId=${coffeeShopId}&userId=${userId}`,
+    submitCommentMutation.mutate(
       {
         description: comment,
         numberOfUpvote: 0,
         numberOfDownvote: 0,
+        coffeeShopId,
+        isHide: false,
+      },
+      {
+        onSuccess: () => {
+          console.log("success");
+          message.success("Feedback added successfully!");
+          setComment(""); // Clear input after successful submission
+        },
+        onError: (error: any) => {
+          console.log("error");
+          console.error("Error submitting feedback:", error);
+          message.error("Failed to add feedback.");
+        },
       }
     );
-    if (res.status === 201) {
-      message.success("Add feedback successfully!");
-      await getFeedbacks();
-    }
   };
-
-  const loadMore =
-    !initLoading && !loading ? (
-      <div
-        style={{
-          textAlign: "center",
-          marginTop: 12,
-          height: 32,
-          lineHeight: "32px",
-        }}
-      >
-        <Button
-          icon={<DownOutlined />}
-          onClick={onLoadMore}
-          style={{ borderRadius: "16px" }}
-        >
-          See more
-        </Button>
-      </div>
-    ) : null;
 
   return (
     <div className="flex flex-col">
@@ -162,7 +82,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ coffeeShopId }) => {
         }}
       >
         <Input
-          defaultValue="Leave your feedback ..."
+          placeholder="Leave your feedback ..."
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           style={{ borderRadius: "16px" }}
@@ -170,7 +90,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ coffeeShopId }) => {
         <Button
           type="primary"
           onClick={sendFeedbackHandler}
-          disabled={comment.length == 0}
+          disabled={submitCommentMutation.isPending || comment.length === 0}
           style={{ height: "100%", borderRadius: "16px" }}
         >
           Submit
@@ -178,10 +98,9 @@ const CommentSection: React.FC<CommentSectionProps> = ({ coffeeShopId }) => {
       </Space.Compact>
       <List
         className="demo-loadmore-list"
-        loading={initLoading}
+        loading={isFetching && !isFetchingNextPage}
         itemLayout="horizontal"
-        loadMore={loadMore}
-        dataSource={list}
+        dataSource={data?.pages.flatMap((page) => page.feedbacks) || []}
         renderItem={(item) => (
           <List.Item
             actions={[
@@ -189,12 +108,12 @@ const CommentSection: React.FC<CommentSectionProps> = ({ coffeeShopId }) => {
               <a key="list-loadmore-more">Down vote</a>,
             ]}
           >
-            <Skeleton avatar title={false} loading={item.loading} active>
+            <Skeleton avatar title={false} loading={false} active>
               <List.Item.Meta
-                avatar={<Avatar src={item.picture.large} />}
+                avatar={<Avatar src={item.owner.photo} />}
                 title={
                   <a href="https://ant.design">
-                    {item.name?.first} {item.name?.last}
+                    {item.owner?.firstName} {item.owner?.lastName}
                   </a>
                 }
                 description={item.description}
@@ -203,6 +122,25 @@ const CommentSection: React.FC<CommentSectionProps> = ({ coffeeShopId }) => {
           </List.Item>
         )}
       />
+      {hasNextPage && (
+        <div
+          style={{
+            textAlign: "center",
+            marginTop: 12,
+            height: 32,
+            lineHeight: "32px",
+          }}
+        >
+          <Button
+            icon={<DownOutlined />}
+            onClick={() => fetchNextPage()}
+            loading={isFetchingNextPage}
+            style={{ borderRadius: "16px" }}
+          >
+            {isFetchingNextPage ? "Loading..." : "See more"}
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

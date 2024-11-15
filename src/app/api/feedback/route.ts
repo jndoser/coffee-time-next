@@ -1,3 +1,4 @@
+import { getUserId } from "@/app/utils/roles";
 import connect from "@/lib/db";
 import CoffeeShop from "@/lib/models/coffeeShop";
 import Feedback from "@/lib/models/feedback";
@@ -5,14 +6,19 @@ import User from "@/lib/models/user";
 import { Types } from "mongoose";
 import { NextResponse } from "next/server";
 
+export interface FeedbacksPage {
+  feedbacks: any[];
+  nextCursor: string | null;
+}
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const coffeeShopId = searchParams.get("coffeeShopId");
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "3");
+    const limit = 5;
     const searchKeywords = searchParams.get("searchKeywords") as string;
     const isHide = searchParams.get("isHide");
+    const cursor = searchParams.get("cursor");
 
     if (!coffeeShopId || !Types.ObjectId.isValid(coffeeShopId)) {
       return NextResponse.json(
@@ -43,18 +49,28 @@ export async function GET(req: Request) {
       ];
     }
 
-    const skip = (page - 1) * limit;
+    const queryOptions = cursor
+      ? { ...filter, _id: { $lt: new Types.ObjectId(cursor) } }
+      : filter;
 
-    const feedbacks = await Feedback.find(filter)
+    const feedbacks = await Feedback.find(queryOptions)
       .sort({
         createdAt: "desc",
       })
-      .skip(skip)
-      .limit(limit)
+      .limit(limit + 1)
       .populate("owner");
 
-    const totalCount = await Feedback.countDocuments(filter);
-    return NextResponse.json({ feedbacks, totalCount }, { status: 200 });
+    const hasNextPage = feedbacks.length > limit;
+    const nextCursor = hasNextPage ? feedbacks[limit - 1]._id.toString() : null;
+
+    const feedbackData = feedbacks.slice(0, limit);
+
+    const response = {
+      feedbacks: feedbackData,
+      nextCursor,
+    } as FeedbacksPage;
+
+    return NextResponse.json(response, { status: 200 });
   } catch (error: any) {
     return NextResponse.json(
       { message: "Error while fetching feedback " + error },
@@ -65,9 +81,8 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const { searchParams } = new URL(req.url);
-    const coffeeShopId = searchParams.get("coffeeShopId");
-    const userId = searchParams.get("userId");
+    const { coffeeShopId, description, numberOfUpvote, numberOfDownvote } =
+      await req.json();
 
     if (!coffeeShopId || !Types.ObjectId.isValid(coffeeShopId)) {
       return NextResponse.json(
@@ -75,6 +90,8 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+
+    const userId = getUserId();
 
     if (!userId || !Types.ObjectId.isValid(userId)) {
       return NextResponse.json(
@@ -102,8 +119,6 @@ export async function POST(req: Request) {
       );
     }
 
-    const { description, numberOfUpvote, numberOfDownvote } = await req.json();
-
     const newFeedback = new Feedback({
       description,
       numberOfUpvote,
@@ -115,14 +130,14 @@ export async function POST(req: Request) {
 
     await newFeedback.save();
 
-    return NextResponse.json(
-      {
-        message: "Feedback is created",
-        feedback: newFeedback,
-      },
-      { status: 201 }
+    // Populate the owner field
+    const populatedFeedback = await Feedback.findById(newFeedback._id).populate(
+      "owner"
     );
+
+    return NextResponse.json(populatedFeedback, { status: 201 });
   } catch (error: any) {
+    console.log("error: ", error);
     return NextResponse.json(
       { message: "Error while creating feedback " + error },
       { status: 500 }
