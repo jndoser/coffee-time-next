@@ -2,25 +2,44 @@ import mongoose from "mongoose";
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
-const connect = async () => {
-  const connectionState = mongoose.connection.readyState;
-  if (connectionState === 1) {
-    console.log("Already connected.");
-    return;
+if (!MONGODB_URI) {
+  throw new Error(
+    "Please define the MONGODB_URI environment variable inside .env.local"
+  );
+}
+
+let cached = (global as any).mongoose;
+
+if (!cached) {
+  cached = (global as any).mongoose = { conn: null, promise: null };
+}
+
+async function connect() {
+  if (cached.conn) {
+    console.log("Using cached connection");
+    return cached.conn;
   }
-  if (connectionState === 2) {
-    console.log("Connecting...");
-    return;
-  }
-  try {
-    mongoose.connect(MONGODB_URI!, {
+
+  if (!cached.promise) {
+    const opts = {
       dbName: "coffee-trick-db",
       bufferCommands: true,
+    };
+
+    console.log("Creating new connection");
+    cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
+      return mongoose;
     });
-  } catch (error: any) {
-    console.log("Error: ", error);
-    throw new Error("Error: ", error);
   }
-};
+
+  try {
+    cached.conn = await cached.promise;
+  } catch (e) {
+    cached.promise = null;
+    throw e;
+  }
+
+  return cached.conn;
+}
 
 export default connect;

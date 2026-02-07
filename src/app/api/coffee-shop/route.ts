@@ -172,8 +172,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
+    const userId = getUserId();
 
     if (!userId || !Types.ObjectId.isValid(userId)) {
       return NextResponse.json(
@@ -186,7 +185,7 @@ export async function POST(req: Request) {
 
     await connect();
 
-    const user = User.findById(userId);
+    const user = await User.findById(userId);
     if (!user) {
       return NextResponse.json(
         { message: "User does not exist" },
