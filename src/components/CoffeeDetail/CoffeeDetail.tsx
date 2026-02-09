@@ -6,7 +6,7 @@ import React, { useEffect, useState } from "react";
 import CoffeePicturesSection, { ImageType } from "../CoffeePicturesSection/CoffeePicturesSection";
 import MenuCarousel from "../MenuCarousel/MenuCarousel";
 import CommentSection from "../CommentSection/CommentSection";
-import axios from "axios";
+import { fetchCoffeeShopById } from "@/actions/coffee-shop";
 
 interface CoffeeDetailProps {
   coffeeShopId: string;
@@ -26,8 +26,7 @@ function CoffeeDetail({ coffeeShopId }: CoffeeDetailProps) {
 
   useEffect(() => {
     const getCoffeeShopById = async (coffeeShopId: string) => {
-      const res = await axios.get("/api/coffee-shop/" + coffeeShopId);
-      const rawCoffeeShopData = res.data;
+      const rawCoffeeShopData = await fetchCoffeeShopById(coffeeShopId);
       const coffeeShopData = {
         id: rawCoffeeShopData._id,
         title: rawCoffeeShopData.title,

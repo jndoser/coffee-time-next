@@ -1,8 +1,9 @@
 "use client";
 import { App, Button, Form, Input, Space, Upload } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
-import axios from "axios";
 import React from "react";
+import { createFoodBeverage } from "@/actions/food-beverage";
+import { deleteImageAction, uploadImages } from "@/actions/image";
 
 const normFile = (e: any) => {
   if (Array.isArray(e)) {
@@ -13,12 +14,22 @@ const normFile = (e: any) => {
 
 const removeFileHandler = async (file: any) => {
   const deleteFilePublicId = file.response.responseData[0].public_id;
-  const res = await axios.delete(
-    `/api/images/upload/${deleteFilePublicId.replace(
-      "nextjs-coffee-images/",
-      ""
-    )}`
+  await deleteImageAction(
+    deleteFilePublicId.replace("nextjs-coffee-images/", "")
   );
+};
+
+const customUploadRequest = async (options: any) => {
+  const { onSuccess, onError, file } = options;
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    const res = await uploadImages(formData);
+    onSuccess(res, file);
+  } catch (err) {
+    onError({ event: err });
+  }
 };
 
 interface CreateMenuFormProps {
@@ -47,11 +58,11 @@ function CreateMenuForm({
       image: images[0],
     };
 
-    const res = await axios.post(
-      `/api/food-beverage?coffeeShopId=${coffeeShopId}`,
-      menu
-    );
-    if (res.status === 201) {
+    const res = await createFoodBeverage({
+      coffeeShopId,
+      ...menu,
+    });
+    if (res) {
       message.success("Create Menu Successfully");
       onClose();
       onRefresh();
@@ -81,7 +92,7 @@ function CreateMenuForm({
         <Upload
           name="logo"
           listType="picture"
-          action="/api/images/upload"
+          customRequest={customUploadRequest}
           onRemove={removeFileHandler}
           onChange={() => {}}
         >

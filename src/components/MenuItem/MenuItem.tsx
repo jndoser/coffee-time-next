@@ -5,9 +5,10 @@ import Meta from "antd/es/card/Meta";
 import Image from "next/image";
 import { DollarOutlined } from "@ant-design/icons";
 import React, { useState } from "react";
-import axios from "axios";
 import CustomModal from "../CustomModal/CustomModal";
 import EditMenuForm from "../EditMenuForm/EditMenuForm";
+import { deleteFoodBeverage } from "@/actions/food-beverage";
+import { deleteImageAction } from "@/actions/image";
 
 interface MenuItemProps {
   id: string;
@@ -32,14 +33,9 @@ function MenuItem({ id, title, price, image, onRefresh }: MenuItemProps) {
   const [isShowEditMenuModal, setIsShowEditMenuModal] = useState(false);
 
   const deleteFoodAndBeverage = async () => {
-    const deleterRes = await axios.delete(
-      `/api/images/upload/${image.publicId.replace(
-        "nextjs-coffee-images/",
-        ""
-      )}`
-    );
-    const res = await axios.delete(`/api/food-beverage/${id}`);
-    if (deleterRes.status === 200 && res.status === 200) {
+    await deleteImageAction(image.publicId.replace("nextjs-coffee-images/", ""));
+    const res = await deleteFoodBeverage(id);
+    if (res) {
       message.success("Delete Menu Successfully");
       onRefresh();
     }

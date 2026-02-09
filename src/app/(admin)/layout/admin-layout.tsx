@@ -2,10 +2,10 @@
 import React, { useEffect, useState } from "react";
 import { Layout, Menu, Switch, theme } from "antd";
 import { SignedIn, useAuth, UserButton, useUser } from "@clerk/nextjs";
-import axios from "axios";
 import { useDispatch } from "react-redux";
 import { setUserInfo } from "@/store/slicers/userInfoSlicer";
 import Search from "antd/es/input/Search";
+import { fetchUsers } from "@/actions/user";
 import { setSearchKeywords } from "@/store/slicers/searchKeywordsSlicer";
 import {
   showApprovedList,
@@ -47,15 +47,16 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
   useEffect(() => {
     const saveUserInfo = async () => {
-      const rawUserInfo = await axios.get(`/api/user?clerkId=${userId}`);
+      if (!userId) return;
+      const rawUserInfo = await fetchUsers({ clerkId: userId });
       const userInfo = {
-        id: rawUserInfo.data.users[0]._id,
-        clerkId: rawUserInfo.data.users[0].clerkId,
-        email: rawUserInfo.data.users[0].email,
-        username: rawUserInfo.data.users[0].username,
-        photo: rawUserInfo.data.users[0].photo,
-        firstName: rawUserInfo.data.users[0].firstName,
-        lastName: rawUserInfo.data.users[0].lastName,
+        id: rawUserInfo.users[0]._id,
+        clerkId: rawUserInfo.users[0].clerkId,
+        email: rawUserInfo.users[0].email,
+        username: rawUserInfo.users[0].username,
+        photo: rawUserInfo.users[0].photo,
+        firstName: rawUserInfo.users[0].firstName,
+        lastName: rawUserInfo.users[0].lastName,
       };
 
       dispatch(setUserInfo(userInfo));

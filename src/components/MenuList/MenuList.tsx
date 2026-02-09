@@ -6,8 +6,8 @@ import MenuItem from "../MenuItem/MenuItem";
 import CustomModal from "../CustomModal/CustomModal";
 import { PlusOutlined } from "@ant-design/icons";
 import CreateMenuForm from "../CreateMenuForm/CreateMenuForm";
-import axios from "axios";
 import { FoodAndBeverageType } from "../MenuCarousel/MenuCarousel";
+import { fetchFoodBeverages } from "@/actions/food-beverage";
 
 interface TasksProps {
   coffeeShopId: string;
@@ -22,11 +22,8 @@ function MenuList({ coffeeShopId }: TasksProps) {
   };
 
   const getMenus = async () => {
-    const rawMenus = await axios.get(
-      `/api/food-beverage?coffeeShopId=${coffeeShopId}`
-    );
-    const menuInfo = rawMenus.data;
-    const menus = menuInfo.map((menu: any) => ({
+    const rawMenus = await fetchFoodBeverages(coffeeShopId);
+    const menus = rawMenus.map((menu: any) => ({
       id: menu._id,
       title: menu.title,
       price: menu.price,

@@ -4,8 +4,8 @@ import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import { App, Avatar, List, Skeleton, Space } from "antd";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import axios from "axios";
 import SkeletonButton from "antd/es/skeleton/Button";
+import { fetchUsers, rejectUser, updateUserRole } from "@/actions/user";
 
 const IconText = ({
   icon,
@@ -52,12 +52,13 @@ const UserList: React.FC = () => {
 
   const getUsers = async (page: number, searchKeywords: string) => {
     setLoading(true);
-    const res = await axios.get(
-      `/api/user?role=${
-        isDisplayApprovedList ? "owner" : "user"
-      }&page=${page}&limit=5&searchKeywords=${searchKeywords}&isRejected=false`
-    );
-    const rawUsersData = res.data;
+    const rawUsersData = await fetchUsers({
+      role: isDisplayApprovedList ? "owner" : "user",
+      page,
+      limit: 5,
+      searchKeywords,
+      isRejected: false,
+    });
     const userListData = rawUsersData.users.map((user: any) => ({
       id: user._id,
       clerkId: user.clerkId,
@@ -77,35 +78,27 @@ const UserList: React.FC = () => {
   }, [searchKeywords, isDisplayApprovedList]);
 
   const setOwnerRoleForUser = async (userId: string) => {
-    const res = await axios.patch(`/api/user/${userId}`, {
-      action: "SET_ROLE",
-      role: "owner",
-    });
+    const res = await updateUserRole(userId, "owner");
 
-    if (res.status === 200) {
+    if (res) {
       message.success("Approve successfully");
       getUsers(1, "");
     }
   };
 
   const revokeOwnerRoleForUser = async (userId: string) => {
-    const res = await axios.patch(`/api/user/${userId}`, {
-      action: "SET_ROLE",
-      role: "user",
-    });
+    const res = await updateUserRole(userId, "user");
 
-    if (res.status === 200) {
+    if (res) {
       message.success("Revoke successfully");
       getUsers(1, "");
     }
   };
 
   const rejectOwnerRegistration = async (userId: string) => {
-    const res = await axios.patch(`/api/user/${userId}`, {
-      action: "REJECT",
-    });
+    const res = await rejectUser(userId);
 
-    if (res.status === 200) {
+    if (res) {
       message.success("Reject successfully");
       getUsers(1, "");
     }
