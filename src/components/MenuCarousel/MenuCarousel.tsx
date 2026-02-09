@@ -5,7 +5,7 @@ import Title from "antd/es/typography/Title";
 import Image from "next/image";
 import { DollarOutlined } from "@ant-design/icons";
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { fetchFoodBeverages } from "@/actions/food-beverage";
 
 const IconText = ({ icon, text }: { icon: React.FC; text: string }) => (
   <Space>
@@ -92,10 +92,7 @@ function MenuCarousel({ coffeeShopId }: MenuCarouselProps) {
   );
   useEffect(() => {
     const getFoodAndBeverage = async (coffeeShopId: string) => {
-      const res = await axios.get(
-        "/api/food-beverage?coffeeShopId=" + coffeeShopId
-      );
-      const rawFoodAndBeverageData = res.data;
+      const rawFoodAndBeverageData = await fetchFoodBeverages(coffeeShopId);
       const foodAndBeverageInfo = rawFoodAndBeverageData.map(
         (foodBeverage: any) => ({
           id: foodBeverage._id,

@@ -14,8 +14,8 @@ import {
   setNearbyCoffeeShops,
   setSelectedLocation,
 } from "@/store/slicers/searchMapSlicer";
-import axios from "axios";
 import CoffeeShopMarker from "../CoffeeShopMarker/CoffeeShopMarker";
+import { searchNearbyCoffeeShops } from "@/actions/coffee-shop";
 
 function SearchCoffeeShop() {
   const selectedLocation = useSelector(
@@ -39,12 +39,13 @@ function SearchCoffeeShop() {
 
   useEffect(() => {
     const getNearbyCoffee = async () => {
-      const response = await axios.get(
-        `/api/coffee-shop/search-nearby?location=${`${selectedLocation
+      const response = await searchNearbyCoffeeShops(
+        `${selectedLocation
           ?.lat()
-          .toString()},${selectedLocation?.lng().toString()}`}&radius=1500`
+          .toString()},${selectedLocation?.lng().toString()}`,
+        "1500"
       );
-      dispatch(setNearbyCoffeeShops(response.data));
+      dispatch(setNearbyCoffeeShops(response));
     };
     getNearbyCoffee();
     console.log("find nearby coffee shop");

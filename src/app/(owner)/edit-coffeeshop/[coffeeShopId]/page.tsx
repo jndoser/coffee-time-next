@@ -13,10 +13,11 @@ import Title from "antd/es/typography/Title";
 import { UploadOutlined, EditOutlined } from "@ant-design/icons";
 import React, { useEffect, useState } from "react";
 import { CoffeeShopType } from "@/components/CoffeeDetail/CoffeeDetail";
-import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import { fetchCoffeeShopById, updateCoffeeShop } from "@/actions/coffee-shop";
+import { deleteImageAction, uploadImages } from "@/actions/image";
 
 const formItemLayout = {
   labelCol: { span: 6 },
@@ -32,12 +33,22 @@ const normFile = (e: any) => {
 
 const removeFileHandler = async (file: any) => {
   const deleteFilePublicId = file.response.responseData[0].public_id;
-  const res = await axios.delete(
-    `/api/images/upload/${deleteFilePublicId.replace(
-      "nextjs-coffee-images/",
-      ""
-    )}`
+  await deleteImageAction(
+    deleteFilePublicId.replace("nextjs-coffee-images/", "")
   );
+};
+
+const customUploadRequest = async (options: any) => {
+  const { onSuccess, onError, file } = options;
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    const res = await uploadImages(formData);
+    onSuccess(res, file);
+  } catch (err) {
+    onError({ event: err });
+  }
 };
 
 interface Props {
@@ -55,8 +66,7 @@ function EditCoffeeShopPage({ params: { coffeeShopId } }: Props) {
 
   useEffect(() => {
     const getCoffeeShopById = async (coffeeShopId: string) => {
-      const res = await axios.get("/api/coffee-shop/" + coffeeShopId);
-      const rawCoffeeShopData = res.data;
+      const rawCoffeeShopData = await fetchCoffeeShopById(coffeeShopId);
       const coffeeShopData = {
         id: rawCoffeeShopData._id,
         title: rawCoffeeShopData.title,
@@ -103,13 +113,11 @@ function EditCoffeeShopPage({ params: { coffeeShopId } }: Props) {
       bio: values.bio,
       description: values.description,
       images: images,
+      userId,
     };
 
-    const res = await axios.patch(
-      `/api/coffee-shop/${coffeeShopId}?userId=${userId}`,
-      newCoffeeShop
-    );
-    if (res.status === 200) {
+    const res = await updateCoffeeShop(coffeeShopId, newCoffeeShop);
+    if (res) {
       message.success("Update Coffee Shop Successfully");
       router.push("/owner/coffee-shop");
     }
@@ -165,7 +173,7 @@ function EditCoffeeShopPage({ params: { coffeeShopId } }: Props) {
             <Upload
               name="logo"
               listType="picture"
-              action="/api/images/upload"
+              customRequest={customUploadRequest}
               onRemove={removeFileHandler}
               onChange={() => {}}
               multiple

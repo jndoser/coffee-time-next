@@ -5,7 +5,7 @@ import CoffeeItem from "../CoffeeItem/CoffeeItem";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { useQuery, QueryKey } from "@tanstack/react-query";
-import axios from "axios";
+import { fetchCoffeeShops } from "@/actions/coffee-shop";
 
 export interface CoffeeShopType {
   _id: string;
@@ -33,7 +33,7 @@ interface CoffeeShopResponse {
   totalCount: number;
 }
 
-const fetchCoffeeShops = async ({
+const fetchCoffeeShopsQuery = async ({
   queryKey,
 }: {
   queryKey: QueryKey;
@@ -45,12 +45,14 @@ const fetchCoffeeShops = async ({
     string?
   ]; // Type assertion to cast queryKey
 
-  const url = userId
-    ? `/api/coffee-shop?userId=${userId}&page=${page}&limit=5&searchKeywords=${searchKeywords}&isVerified=true&isRejected=false`
-    : `/api/coffee-shop?page=${page}&limit=5&searchKeywords=${searchKeywords}&isVerified=true&isRejected=false`;
-
-  const res = await axios.get<CoffeeShopResponse>(url);
-  return res.data;
+  return await fetchCoffeeShops({
+    page,
+    limit: 5,
+    searchKeywords,
+    userId,
+    isVerified: true,
+    isRejected: false,
+  });
 };
 
 function CoffeeList({ userId }: CoffeeListProps) {
@@ -61,7 +63,7 @@ function CoffeeList({ userId }: CoffeeListProps) {
 
   const { data, isLoading } = useQuery<CoffeeShopResponse>({
     queryKey: ["coffeeShops", currentPage, searchKeywords, userId],
-    queryFn: fetchCoffeeShops,
+    queryFn: fetchCoffeeShopsQuery,
     staleTime: 3000,
   });
 

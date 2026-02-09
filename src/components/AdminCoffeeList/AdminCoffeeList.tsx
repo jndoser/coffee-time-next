@@ -8,10 +8,10 @@ import {
 import { App, Avatar, List, Skeleton, Space } from "antd";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import axios from "axios";
 import SkeletonButton from "antd/es/skeleton/Button";
 import { CoffeeShopWithPreview } from "../CoffeeList/CoffeeList";
 import { useRouter } from "next/navigation";
+import { fetchCoffeeShops, updateCoffeeShopStatus } from "@/actions/coffee-shop";
 
 const IconText = ({
   icon,
@@ -49,10 +49,13 @@ const AdminCoffeeList: React.FC = () => {
 
   const getUsers = async (page: number, searchKeywords: string) => {
     setLoading(true);
-    const res = await axios.get(
-      `/api/coffee-shop?page=${page}&limit=5&searchKeywords=${searchKeywords}&isVerified=${isDisplayApprovedList}&isRejected=false`
-    );
-    const rawCoffeeShopData = res.data;
+    const rawCoffeeShopData = await fetchCoffeeShops({
+      page,
+      limit: 5,
+      searchKeywords,
+      isVerified: isDisplayApprovedList,
+      isRejected: false,
+    });
     const coffeeShopListData = rawCoffeeShopData.coffeeShops.map(
       (coffeeShop: any) => ({
         id: coffeeShop._id,
@@ -73,33 +76,27 @@ const AdminCoffeeList: React.FC = () => {
   }, [searchKeywords, isDisplayApprovedList]);
 
   const approveCoffeeShop = async (coffeeShopId: string) => {
-    const res = await axios.patch(`/api/coffee-shop/${coffeeShopId}`, {
-      action: "APPROVE",
-    });
+    const res = await updateCoffeeShopStatus(coffeeShopId, "APPROVE");
 
-    if (res.status === 200) {
+    if (res) {
       message.success("Approve successfully");
       getUsers(1, "");
     }
   };
 
   const revokeCoffeeShop = async (coffeeShopId: string) => {
-    const res = await axios.patch(`/api/coffee-shop/${coffeeShopId}`, {
-      action: "REVOKE",
-    });
+    const res = await updateCoffeeShopStatus(coffeeShopId, "REVOKE");
 
-    if (res.status === 200) {
+    if (res) {
       message.success("Revoke successfully");
       getUsers(1, "");
     }
   };
 
   const rejectCoffeeShop = async (coffeeShopId: string) => {
-    const res = await axios.patch(`/api/coffee-shop/${coffeeShopId}`, {
-      action: "REJECT",
-    });
+    const res = await updateCoffeeShopStatus(coffeeShopId, "REJECT");
 
-    if (res.status === 200) {
+    if (res) {
       message.success("Reject successfully");
       getUsers(1, "");
     }

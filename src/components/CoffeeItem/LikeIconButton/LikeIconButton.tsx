@@ -8,7 +8,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import axios from "axios";
+import { getLikes, toggleLike } from "@/actions/coffee-shop";
 
 interface LikeInfo {
   likes: number;
@@ -29,18 +29,14 @@ function LikeIconButton({ coffeeShopId, initialState }: LikeIconButtonProps) {
   const { data, isFetching } = useQuery<LikeInfo>({
     queryKey,
     queryFn: async () => {
-      const res = await axios.get(`/api/coffee-shop/${coffeeShopId}/likes`);
-      return res.data;
+      return await getLikes(coffeeShopId);
     },
     initialData: initialState,
     staleTime: Infinity,
   });
 
   const { mutate } = useMutation({
-    mutationFn: async () =>
-      data.isLikedByUser
-        ? await axios.delete(`/api/coffee-shop/${coffeeShopId}/likes`)
-        : await axios.post(`/api/coffee-shop/${coffeeShopId}/likes`),
+    mutationFn: async () => await toggleLike(coffeeShopId),
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey });
 

@@ -4,8 +4,8 @@ import { EyeInvisibleOutlined, EyeOutlined } from "@ant-design/icons";
 import { App, Avatar, List, Skeleton, Space } from "antd";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import axios from "axios";
 import SkeletonButton from "antd/es/skeleton/Button";
+import { fetchFeedbacks, updateFeedbackVisibility } from "@/actions/feedback";
 
 const IconText = ({
   icon,
@@ -62,11 +62,12 @@ const FeedbackList: React.FC<FeedbackListProps> = ({ coffeeShopId }) => {
 
   const getFeedbacks = async (page: number, searchKeywords: string) => {
     setLoading(true);
-    const rawFeedbacks = await axios.get(
-      `/api/feedback?coffeeShopId=${coffeeShopId}&page=${page}&limit=10&searchKeywords=${searchKeywords}&isHide=${isDisplayApprovedList}`
-    );
+    const feedbacksInfo = await fetchFeedbacks({
+      coffeeShopId,
+      searchKeywords,
+      isHide: isDisplayApprovedList,
+    });
 
-    const feedbacksInfo = rawFeedbacks.data;
     const feedbackData = feedbacksInfo.feedbacks.map((feedback: any) => ({
       id: feedback._id,
       name: {
@@ -82,7 +83,7 @@ const FeedbackList: React.FC<FeedbackListProps> = ({ coffeeShopId }) => {
       email: feedback.owner.email,
     }));
     setFeedbacks(feedbackData);
-    setTotalCount(feedbackData.totalCount);
+    // setTotalCount(feedbackData.totalCount); // Total count is not returned by API or Action
     setLoading(false);
   };
 
@@ -91,22 +92,18 @@ const FeedbackList: React.FC<FeedbackListProps> = ({ coffeeShopId }) => {
   }, [searchKeywords, isDisplayApprovedList]);
 
   const hideFeedbackHandler = async (feedbackId: string) => {
-    const res = await axios.patch(`/api/feedback/${feedbackId}`, {
-      action: "HIDE",
-    });
+    const res = await updateFeedbackVisibility(feedbackId, "HIDE");
 
-    if (res.status === 200) {
+    if (res) {
       message.success("Hide successfully");
       getFeedbacks(1, "");
     }
   };
 
   const showFeedbackHandler = async (feedbackId: string) => {
-    const res = await axios.patch(`/api/feedback/${feedbackId}`, {
-      action: "SHOW",
-    });
+    const res = await updateFeedbackVisibility(feedbackId, "SHOW");
 
-    if (res.status === 200) {
+    if (res) {
       message.success("Show successfully");
       getFeedbacks(1, "");
     }

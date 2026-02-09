@@ -1,11 +1,11 @@
-import { FeedbacksPage } from "@/app/api/feedback/route";
+import { FeedbacksPage } from "@/actions/feedback";
 import {
   InfiniteData,
   QueryKey,
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import axios from "axios";
+import { createFeedback } from "@/actions/feedback";
 
 interface FeedbackInputData {
   description: string;
@@ -20,8 +20,7 @@ export function useSubmitCommentMutation() {
 
   const mutation = useMutation({
     mutationFn: async (feedbackInputData: FeedbackInputData) => {
-      const res = await axios.post("/api/feedback", feedbackInputData);
-      return res.data;
+      return await createFeedback(feedbackInputData);
     },
     onSuccess: async (newComment: any) => {
       const queryKey: QueryKey = ["comments", newComment.coffeeShop];

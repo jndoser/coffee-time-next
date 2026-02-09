@@ -3,14 +3,9 @@ import React, { useState } from "react";
 import { App, Avatar, Button, Input, List, Skeleton, Space } from "antd";
 import Title from "antd/es/typography/Title";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import axios from "axios";
 import { DownOutlined } from "@ant-design/icons";
 import { useSubmitCommentMutation } from "./mutation";
-
-interface APIResponse {
-  feedbacks: any[];
-  nextCursor: string | null;
-}
+import { fetchFeedbacks } from "@/actions/feedback";
 
 interface CommentSectionProps {
   coffeeShopId: string;
@@ -21,22 +16,22 @@ const CommentSection: React.FC<CommentSectionProps> = ({ coffeeShopId }) => {
   const { message } = App.useApp();
 
   // Infinite query for fetching feedbacks
-  const fetchFeedbacks = async ({
+  const fetchFeedbacksHandler = async ({
     pageParam = null,
   }: {
     pageParam?: string | null;
   }) => {
-    const response = await axios.get<APIResponse>(
-      `/api/feedback?coffeeShopId=${coffeeShopId}&isHide=false`,
-      { params: { cursor: pageParam } }
-    );
-    return response.data;
+    return await fetchFeedbacks({
+      coffeeShopId,
+      isHide: false,
+      cursor: pageParam || undefined,
+    });
   };
 
   const { data, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: ["comments", coffeeShopId],
-      queryFn: fetchFeedbacks,
+      queryFn: fetchFeedbacksHandler,
       getNextPageParam: (lastPage) => lastPage.nextCursor,
       initialPageParam: null as string | null, // Set null as the initial value for cursor
     });
