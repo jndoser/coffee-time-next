@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Layout, Menu, theme } from "antd";
+import { Layout, Menu, theme, Button } from "antd";
 import {
   SignInButton,
   SignedIn,
@@ -25,15 +25,23 @@ const items = [
   },
   {
     key: "browser",
-    label: <Title level={5}>Browser</Title>,
+    label: <Title level={5}>Browse</Title>,
   },
   {
-    key: "about-us",
-    label: <Title level={5}>About Us</Title>,
+    key: "discover",
+    label: <Title level={5}>☕ Discover</Title>,
+  },
+  {
+    key: "messages",
+    label: <Title level={5}>💬 Messages</Title>,
   },
   {
     key: "search-coffee-shop",
     label: <Title level={5}>Maps</Title>,
+  },
+  {
+    key: "about-us",
+    label: <Title level={5}>About Us</Title>,
   },
 ];
 
@@ -88,8 +96,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       case "browser":
         router.push("/");
         break;
+      case "discover":
+        router.push("/discover");
+        break;
+      case "messages":
+        router.push("/messages");
+        break;
       case "about-us":
-        router.push("about-us");
+        router.push("/about-us");
         break;
       case "search-coffee-shop":
         router.push("/search-coffee-shop");
@@ -100,18 +114,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   };
 
   const getSelectedKey = () => {
-    switch (pathname) {
-      case "/":
-        return "browser";
-      case "/home":
-        return "home";
-      case "/about-us":
-        return "about-us";
-      case "/search-coffee-shop":
-        return "search-coffee-shop";
-      default:
-        return "browser";
-    }
+    if (pathname === "/") return "browser";
+    if (pathname === "/home") return "home";
+    if (pathname === "/about-us") return "about-us";
+    if (pathname === "/search-coffee-shop") return "search-coffee-shop";
+    if (pathname.startsWith("/discover")) return "discover";
+    if (pathname.startsWith("/messages")) return "messages";
+    return "browser";
   };
 
   return (
@@ -160,12 +169,22 @@ const MainLayout: React.FC<MainLayoutProps> = ({
             style={{ minWidth: 0, borderBottom: "none" }}
             onClick={clickMenuHandler}
           />
-          <div>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <SignedOut>
               <SignInButton />
             </SignedOut>
             <SignedIn>
-              <UserButton />
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <Button
+                  type="text"
+                  icon={<span style={{ fontSize: "16px" }}>☕</span>}
+                  onClick={() => router.push("/profile/edit")}
+                  style={{ color: "#FF8C00", fontWeight: 600 }}
+                >
+                  Edit Profile
+                </Button>
+                <UserButton />
+              </div>
             </SignedIn>
           </div>
         </div>
