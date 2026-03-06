@@ -28,11 +28,13 @@ interface CheckedInUsersProps {
 export default function CheckedInUsers({ coffeeShopId }: CheckedInUsersProps) {
     const router = useRouter();
 
-    const { data, isLoading } = useQuery({
+    const { data, isLoading, isFetching } = useQuery({
         queryKey: ["checkins", coffeeShopId],
         queryFn: () =>
             axios.get(`/api/checkin/${coffeeShopId}`).then((r) => r.data.checkins as CheckedInUser[]),
-        refetchInterval: 30_000, // refresh every 30s
+        refetchInterval: 30_000,           // re-fetch every 30 seconds
+        refetchIntervalInBackground: true, // keep polling even when tab is hidden
+        refetchOnWindowFocus: true,        // instantly refresh when user returns to tab
     });
 
     if (isLoading) return <Spin size="small" />;
@@ -54,10 +56,28 @@ export default function CheckedInUsers({ coffeeShopId }: CheckedInUsersProps) {
             {/* Header */}
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
                 <span style={{ fontSize: 22 }}>📍</span>
-                <div>
-                    <Text strong style={{ fontSize: 16, color: "#3d2b1f" }}>
-                        {data.length} {data.length === 1 ? "person" : "people"} here right now
-                    </Text>
+                <div style={{ flex: 1 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <Text strong style={{ fontSize: 16, color: "#3d2b1f" }}>
+                            {data.length} {data.length === 1 ? "person" : "people"} here right now
+                        </Text>
+                        {/* Live pulse indicator */}
+                        <span
+                            title="Live updates every 10 seconds"
+                            style={{
+                                display: "inline-block",
+                                width: 8,
+                                height: 8,
+                                borderRadius: "50%",
+                                backgroundColor: isFetching ? "#faad14" : "#52c41a",
+                                boxShadow: isFetching
+                                    ? "0 0 0 3px rgba(250,173,20,0.3)"
+                                    : "0 0 0 3px rgba(82,196,26,0.3)",
+                                transition: "all 0.3s ease",
+                                animation: "pulse 2s infinite",
+                            }}
+                        />
+                    </div>
                     {openToMeet.length > 0 && (
                         <div style={{ fontSize: 13, color: "#FF8C00" }}>
                             {openToMeet.length} open to meet new people ☕
