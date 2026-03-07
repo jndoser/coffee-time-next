@@ -137,7 +137,21 @@ export default function EditProfilePage() {
                 });
             }
 
-            updateCompletion();
+            // Calculate completion directly from API data (not form, to avoid timing issues)
+            const loadedHobbies = user.hobbies || [];
+            const pValsFromData = {
+                bio: user.bio,
+                gender: user.gender,
+                lookingFor: user.lookingFor,
+                dateOfBirth: user.dateOfBirth,
+                hobbies: loadedHobbies,
+            };
+            const cValsFromData = {
+                favoriteDrinks: preference?.favoriteDrinks,
+                roastLevel: preference?.roastLevel,
+                visitFrequency: preference?.visitFrequency,
+            };
+            setCompletion(calcCompletion(pValsFromData, cValsFromData));
         }
     }, [data]);
 
