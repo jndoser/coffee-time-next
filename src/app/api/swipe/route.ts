@@ -1,6 +1,7 @@
 import { getUserId } from "@/app/utils/roles";
 import connect from "@/lib/db";
 import CoffeePreference from "@/lib/models/coffeePreference";
+import Conversation from "@/lib/models/conversation";
 import Match from "@/lib/models/match";
 import Swipe from "@/lib/models/swipe";
 import User from "@/lib/models/user";
@@ -76,6 +77,13 @@ export async function POST(req: Request) {
                 await Match.findOneAndUpdate(
                     { userA, userB },
                     { $set: { userA, userB, matchScore: Math.min(matchScore, 100), commonDrinks, matchedAt: new Date() } },
+                    { upsert: true }
+                );
+
+                // Auto-create conversation so matched users can chat immediately
+                await Conversation.findOneAndUpdate(
+                    { participants: { $all: [userId, toUserId], $size: 2 } },
+                    { $setOnInsert: { participants: [userId, toUserId] } },
                     { upsert: true }
                 );
             }

@@ -164,7 +164,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           <Menu
             theme="light"
             mode="horizontal"
-            defaultSelectedKeys={[getSelectedKey()]}
+            selectedKeys={[getSelectedKey()]}
             items={items}
             style={{ minWidth: 0, borderBottom: "none" }}
             onClick={clickMenuHandler}

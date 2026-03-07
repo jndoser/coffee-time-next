@@ -1,7 +1,9 @@
 "use client";
-import React from "react";
-import { Avatar, Badge, Card, Empty, Tag, Typography } from "antd";
+import React, { useState } from "react";
+import { Avatar, Badge, Button, Card, Tag, Typography } from "antd";
+import { MessageOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
@@ -31,6 +33,7 @@ interface MatchListProps {
 
 export default function MatchList({ matches }: MatchListProps) {
     const router = useRouter();
+    const [loadingId, setLoadingId] = useState<string | null>(null);
 
     if (!matches.length) {
         return (
@@ -48,14 +51,22 @@ export default function MatchList({ matches }: MatchListProps) {
 
     const scoreColor = (s: number) => s >= 80 ? "#52c41a" : s >= 40 ? "#FF8C00" : "#8B6F47";
 
+    const handleMessage = async (e: React.MouseEvent, theirId: string) => {
+        e.stopPropagation(); // don't trigger card click (profile nav)
+        setLoadingId(theirId);
+        try {
+            const res = await axios.post("/api/conversations", { otherUserId: theirId });
+            const conversationId = res.data.conversation._id;
+            router.push(`/messages?open=${conversationId}`);
+        } catch {
+            router.push("/messages");
+        } finally {
+            setLoadingId(null);
+        }
+    };
+
     return (
-        <div
-            style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-                gap: 16,
-            }}
-        >
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 16 }}>
             {matches.map((m) => {
                 const name = `${m.them.firstName || ""}${m.them.lastName ? " " + m.them.lastName : ""}`.trim() || "Coffee Lover";
                 return (
@@ -83,17 +94,7 @@ export default function MatchList({ matches }: MatchListProps) {
                         </div>
 
                         {/* Match score */}
-                        <div
-                            style={{
-                                background: "#fff8f0",
-                                borderRadius: 12,
-                                padding: "8px 12px",
-                                marginBottom: 10,
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                            }}
-                        >
+                        <div style={{ background: "#fff8f0", borderRadius: 12, padding: "8px 12px", marginBottom: 10, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                             <Text style={{ fontSize: 13, color: "#8B6F47" }}>Match score</Text>
                             <Text strong style={{ color: scoreColor(m.matchScore), fontSize: 15 }}>
                                 {m.matchScore}%
@@ -102,17 +103,32 @@ export default function MatchList({ matches }: MatchListProps) {
 
                         {/* Common drinks */}
                         {m.commonDrinks.length > 0 && (
-                            <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 12 }}>
                                 {m.commonDrinks.slice(0, 3).map((d) => (
-                                    <Tag
-                                        key={d}
-                                        style={{ borderRadius: 20, fontSize: 11, padding: "1px 8px", background: "#FFF3E0", borderColor: "#FF8C00", color: "#8B4513" }}
-                                    >
+                                    <Tag key={d} style={{ borderRadius: 20, fontSize: 11, padding: "1px 8px", background: "#FFF3E0", borderColor: "#FF8C00", color: "#8B4513" }}>
                                         ☕ {d.replace(/-/g, " ")}
                                     </Tag>
                                 ))}
                             </div>
                         )}
+
+                        {/* Message button */}
+                        <Button
+                            id={`message-btn-${m._id}`}
+                            type="primary"
+                            icon={<MessageOutlined />}
+                            loading={loadingId === m.them._id}
+                            onClick={(e) => handleMessage(e, m.them._id)}
+                            style={{
+                                width: "100%",
+                                borderRadius: 20,
+                                background: "linear-gradient(135deg, #FF8C00, #D2691E)",
+                                border: "none",
+                                fontWeight: 600,
+                            }}
+                        >
+                            Message
+                        </Button>
                     </Card>
                 );
             })}
