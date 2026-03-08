@@ -72,7 +72,7 @@ export default function DiscoverPage() {
                 <div style={{ textAlign: "center", padding: "80px 20px" }}>
                     <div style={{ fontSize: 56, marginBottom: 16 }}>☕</div>
                     <div style={{ fontSize: 22, fontWeight: 800, color: "#3d2b1f", marginBottom: 8 }}>
-                        You've seen everyone!
+                        You&apos;ve seen everyone!
                     </div>
                     <div style={{ color: "#8B6F47", fontSize: 15 }}>
                         Check back later — new coffee lovers join every day.

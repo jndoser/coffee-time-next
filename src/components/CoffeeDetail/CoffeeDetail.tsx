@@ -118,7 +118,7 @@ function CoffeeDetail({ coffeeShopId }: CoffeeDetailProps) {
                 fontWeight: 600,
               }}
             >
-              📍 I'm Here!
+              📍 I&apos;m Here!
             </Button>
           )}
         </div>
@@ -150,10 +150,10 @@ function CoffeeDetail({ coffeeShopId }: CoffeeDetailProps) {
         <div style={{ textAlign: "center", padding: "8px 0 20px" }}>
           <div style={{ fontSize: 48, marginBottom: 8 }}>☕</div>
           <Title level={4} style={{ color: "#3d2b1f", margin: "0 0 4px" }}>
-            You're at {coffeeShopInfo?.title}!
+            You&apos;re at {coffeeShopInfo?.title}!
           </Title>
           <Paragraph style={{ color: "#8B6F47", margin: "0 0 28px" }}>
-            Let other coffee lovers know you're here.
+            Let other coffee lovers know you&apos;re here.
           </Paragraph>
 
           <div

@@ -616,7 +616,7 @@ export default function EditProfilePage() {
                                 Edit Your Profile
                             </h1>
                             <p style={{ margin: "4px 0 0", color: "#8B6F47" }}>
-                                Help others know who they're meeting for coffee ☕
+                                Help others know who they&apos;re meeting for coffee ☕
                             </p>
                         </div>
                         <div style={{ display: "flex", gap: "12px" }}>

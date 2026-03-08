@@ -281,7 +281,7 @@ export default function UserProfilePage({ params: { userId } }: Props) {
                                     fontStyle: "italic",
                                 }}
                             >
-                                "{user.favoriteQuote}"
+                                &quot;{user.favoriteQuote}&quot;
                             </div>
                         )}
                     </Card>
