@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
-import { Avatar, Button, Empty, Input, Spin } from "antd";
-import { SendOutlined } from "@ant-design/icons";
+import { Avatar, Button, DatePicker, Empty, Input, Modal, Select, Spin, Tooltip } from "antd";
+import { SendOutlined, CoffeeOutlined } from "@ant-design/icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useSelector } from "react-redux";
@@ -11,6 +11,7 @@ import ConversationItem from "@/components/ConversationItem/ConversationItem";
 import { getSocket } from "@/lib/socket";
 import { useRouter, useSearchParams } from "next/navigation";
 import dayjs from "dayjs";
+import type { Dayjs } from "dayjs";
 
 export default function MessagesPage() {
     const queryClient = useQueryClient();
@@ -27,6 +28,12 @@ export default function MessagesPage() {
     const [isTyping, setIsTyping] = useState(false);
     const bottomRef = useRef<HTMLDivElement>(null);
     const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Coffee invite modal state
+    const [inviteModalOpen, setInviteModalOpen] = useState(false);
+    const [inviteShop, setInviteShop] = useState<string>("");
+    const [inviteTime, setInviteTime] = useState<Dayjs | null>(null);
+    const [sendingInvite, setSendingInvite] = useState(false);
 
     // Fetch conversations list
     const { data: convoData, isLoading: convoLoading } = useQuery({
@@ -71,12 +78,20 @@ export default function MessagesPage() {
             queryClient.invalidateQueries({ queryKey: ["conversations"] });
         });
 
+        // Real-time invite status update (accept / decline)
+        socket.on("invite-updated", (updatedMsg: any) => {
+            setMessages((prev) =>
+                prev.map((m) => m._id === updatedMsg._id ? updatedMsg : m)
+            );
+        });
+
         socket.on("typing", ({ userId, isTyping: t }: any) => {
             if (userId !== userInfo.id) setIsTyping(t);
         });
 
         return () => {
             socket.off("new-message");
+            socket.off("invite-updated");
             socket.off("typing");
             if (activeConvoId) socket.emit("leave-conversation", activeConvoId);
         };
@@ -111,6 +126,33 @@ export default function MessagesPage() {
         typingTimeoutRef.current = setTimeout(() => {
             socket.emit("typing", { conversationId: activeConvoId, userId: userInfo.id, isTyping: false });
         }, 1500);
+    };
+
+    // Coffee shops list for invite dropdown
+    const { data: shopsData } = useQuery({
+        queryKey: ["coffee-shops-list"],
+        queryFn: () =>
+            axios.get("/api/coffee-shop?isVerified=true&limit=100")
+                .then((r) => r.data.coffeeShops ?? []),
+        enabled: inviteModalOpen,
+        staleTime: 60_000,
+    });
+    const shopOptions = (shopsData ?? []).map((s: any) => ({ value: s.title, label: s.title, id: s._id }));
+
+    const sendInvite = async () => {
+        if (!inviteShop || !inviteTime || !activeConvoId) return;
+        setSendingInvite(true);
+        try {
+            await axios.post(`/api/conversations/${activeConvoId}/coffee-invite`, {
+                shopName: inviteShop,
+                proposedTime: inviteTime.toISOString(),
+            });
+            setInviteModalOpen(false);
+            setInviteShop("");
+            setInviteTime(null);
+        } finally {
+            setSendingInvite(false);
+        }
     };
 
     const myId = userInfo.id as string;
@@ -184,8 +226,6 @@ export default function MessagesPage() {
                                 : messages.length === 0
                                     ? <div style={{ textAlign: "center", marginTop: 60, color: "#8B6F47" }}>No messages yet. Say hi! ☕</div>
                                     : messages.map((msg) => {
-                                        // Determine ownership by checking if sender is the OTHER user (them).
-                                        // This works even if userInfo.id hasn't loaded yet from Redux.
                                         const theirId = activeConvo?.them?._id?.toString();
                                         const senderId = msg.sender?._id?.toString() ?? msg.sender?.toString();
                                         const isOwn = theirId ? senderId !== theirId : senderId === myId;
@@ -194,6 +234,12 @@ export default function MessagesPage() {
                                                 key={msg._id}
                                                 message={msg}
                                                 isOwn={isOwn}
+                                                conversationId={activeConvoId ?? ""}
+                                                onInviteUpdate={(updated) =>
+                                                    setMessages((prev) =>
+                                                        prev.map((m) => m._id === updated._id ? updated : m)
+                                                    )
+                                                }
                                             />
                                         );
                                     })
@@ -207,7 +253,17 @@ export default function MessagesPage() {
                         </div>
 
                         {/* Input */}
-                        <div style={{ padding: "12px 16px", borderTop: "1px solid #f0e6d3", display: "flex", gap: 8, background: "white" }}>
+                        <div style={{ padding: "12px 16px", borderTop: "1px solid #f0e6d3", display: "flex", gap: 8, background: "white", alignItems: "center" }}>
+                            <Tooltip title="Send a coffee date invite ☕">
+                                <Button
+                                    id="coffee-invite-btn"
+                                    shape="circle"
+                                    size="large"
+                                    icon={<CoffeeOutlined style={{ color: "#FF8C00", fontSize: 18 }} />}
+                                    onClick={() => setInviteModalOpen(true)}
+                                    style={{ border: "1.5px solid #FF8C00", flexShrink: 0 }}
+                                />
+                            </Tooltip>
                             <Input
                                 id="message-input"
                                 placeholder="Type a message..."
@@ -231,6 +287,61 @@ export default function MessagesPage() {
                     </div>
                 )
             }
+
+            {/* ── Coffee Date Invite Modal ── */}
+            <Modal
+                title={<span>☕ Send a Coffee Date Invite</span>}
+                open={inviteModalOpen}
+                onCancel={() => { setInviteModalOpen(false); setInviteShop(""); setInviteTime(null); }}
+                onOk={sendInvite}
+                okText="Send Invite"
+                okButtonProps={{
+                    loading: sendingInvite,
+                    disabled: !inviteShop || !inviteTime,
+                    style: { background: "linear-gradient(135deg, #FF8C00, #D2691E)", border: "none" },
+                }}
+            >
+                <div style={{ display: "flex", flexDirection: "column", gap: 16, padding: "8px 0" }}>
+                    <div>
+                        <div style={{ fontWeight: 600, marginBottom: 6, color: "#5a3e2b" }}>☕ Coffee Shop</div>
+                        <Select
+                            id="invite-shop-select"
+                            showSearch
+                            placeholder="Search or type a shop name…"
+                            value={inviteShop || undefined}
+                            onChange={setInviteShop}
+                            options={shopOptions.length > 0 ? shopOptions : undefined}
+                            style={{ width: "100%" }}
+                            mode={undefined}
+                            allowClear
+                            filterOption={(input, opt) =>
+                                (opt?.label as string ?? "").toLowerCase().includes(input.toLowerCase())
+                            }
+                            notFoundContent={
+                                <div style={{ padding: 8, color: "#8B6F47" }}
+                                    onClick={() => { if (inviteShop) return; }}
+                                >
+                                    No shops found — type a name to use it
+                                </div>
+                            }
+                            onSearch={(val) => setInviteShop(val)}
+                        />
+                    </div>
+                    <div>
+                        <div style={{ fontWeight: 600, marginBottom: 6, color: "#5a3e2b" }}>📅 Proposed Date & Time</div>
+                        <DatePicker
+                            id="invite-date-picker"
+                            showTime={{ format: "HH:mm" }}
+                            format="ddd, MMM D · HH:mm"
+                            placeholder="Pick a date and time"
+                            value={inviteTime}
+                            onChange={setInviteTime}
+                            disabledDate={(d) => d.isBefore(dayjs().startOf("day"))}
+                            style={{ width: "100%" }}
+                        />
+                    </div>
+                </div>
+            </Modal>
         </div>
     );
 }
