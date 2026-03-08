@@ -7,6 +7,7 @@ import {
   SignedOut,
   UserButton,
   useAuth,
+  useUser,
 } from "@clerk/nextjs";
 import Search from "antd/es/input/Search";
 import { usePathname, useRouter } from "next/navigation";
@@ -59,7 +60,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   const dispatch = useDispatch();
   const [keywords, setKeywords] = useState("");
   const { userId } = useAuth();
+  const { user } = useUser();
   const pathname = usePathname();
+
+  const isAdmin = user?.publicMetadata?.role === "admin";
 
   useEffect(() => {
     const saveUserInfo = async () => {
@@ -175,6 +179,15 @@ const MainLayout: React.FC<MainLayoutProps> = ({
             </SignedOut>
             <SignedIn>
               <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                {isAdmin && (
+                  <Button
+                    type="primary"
+                    onClick={() => router.push("/admin/owner-registration")}
+                    style={{ background: "#1890ff", fontWeight: 600 }}
+                  >
+                    Admin Dashboard
+                  </Button>
+                )}
                 <Button
                   type="text"
                   icon={<span style={{ fontSize: "16px" }}>☕</span>}

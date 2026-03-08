@@ -1,5 +1,6 @@
 import { getUserId } from "@/app/utils/roles";
 import connect from "@/lib/db";
+import Block from "@/lib/models/block";
 import Match from "@/lib/models/match";
 import User from "@/lib/models/user";
 import { NextResponse } from "next/server";
@@ -12,6 +13,16 @@ export async function GET() {
 
         await connect();
 
+        // Get blocks
+        const [iBlocked, blockedMe] = await Promise.all([
+            Block.find({ blocker: userId }, "blocked").lean(),
+            Block.find({ blocked: userId }, "blocker").lean(),
+        ]);
+        const blockSet = new Set([
+            ...iBlocked.map((b: any) => b.blocked.toString()),
+            ...blockedMe.map((b: any) => b.blocker.toString()),
+        ]);
+
         const matches = await Match.find({
             $or: [{ userA: userId }, { userB: userId }],
         })
@@ -21,16 +32,18 @@ export async function GET() {
             .lean();
 
         // Return each match with a "them" field pointing to the other user
-        const formatted = matches.map((m: any) => {
-            const them = m.userA._id.toString() === userId ? m.userB : m.userA;
-            return {
-                _id: m._id,
-                them,
-                matchScore: Math.min(m.matchScore ?? 0, 100),
-                commonDrinks: m.commonDrinks,
-                matchedAt: m.matchedAt,
-            };
-        });
+        const formatted = matches
+            .map((m: any) => {
+                const them = m.userA._id.toString() === userId ? m.userB : m.userA;
+                return {
+                    _id: m._id,
+                    them,
+                    matchScore: Math.min(m.matchScore ?? 0, 100),
+                    commonDrinks: m.commonDrinks,
+                    matchedAt: m.matchedAt,
+                };
+            })
+            .filter((m) => !blockSet.has(m.them._id.toString())); // exclude blocked matches
 
         return NextResponse.json({ matches: formatted }, { status: 200 });
     } catch (error: any) {

@@ -20,6 +20,7 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import BlockReportButtons from "@/components/BlockReportButtons/BlockReportButtons";
 
 dayjs.extend(relativeTime);
 
@@ -240,13 +241,19 @@ export default function UserProfilePage({ params: { userId } }: Props) {
                                     display: "flex",
                                     alignItems: "center",
                                     gap: 4,
-                                    marginBottom: 4,
+                                    marginBottom: 12,
                                 }}
                             >
                                 <ClockCircleOutlined />
                                 Active {dayjs(user.lastActiveAt).fromNow()}
                             </div>
                         )}
+
+                        {/* Block / Report buttons */}
+                        <BlockReportButtons
+                            targetUserId={userId}
+                            targetName={`${user.firstName || ""}${user.lastName ? " " + user.lastName : ""}`.trim() || "this user"}
+                        />
                     </div>
                 </Card>
             </div>

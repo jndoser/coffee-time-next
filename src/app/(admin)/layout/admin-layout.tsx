@@ -11,7 +11,8 @@ import {
   showApprovedList,
   showPendingApproveList,
 } from "@/store/slicers/adminStateSlicer";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -25,8 +26,8 @@ const items = [
     label: "Coffee Shop Registration",
   },
   {
-    key: "comments-list",
-    label: "Comments List",
+    key: "reports",
+    label: "User Reports",
   },
 ];
 
@@ -43,6 +44,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const dispatch = useDispatch();
   const { user } = useUser();
   const pathname = usePathname();
+  const router = useRouter();
   const [keywords, setKeywords] = useState("");
 
   useEffect(() => {
@@ -76,8 +78,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         return "request-owner";
       case "/admin/coffee-shop-registration":
         return "request-coffee";
-      case "/about-us":
-        return "about-us";
+      case "/admin/reports":
+        return "reports";
       default:
         return "request-owner";
     }
@@ -116,6 +118,11 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           mode="inline"
           defaultSelectedKeys={[getSelectedKey()]}
           items={items}
+          onClick={({ key }) => {
+            if (key === "request-owner") router.push("/admin/owner-registration");
+            if (key === "request-coffee") router.push("/admin/coffee-shop-registration");
+            if (key === "reports") router.push("/admin/reports");
+          }}
         />
       </Sider>
       <Layout style={{ marginLeft: 200, height: "100vh" }}>

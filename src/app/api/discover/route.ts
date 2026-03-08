@@ -1,5 +1,6 @@
 import { getUserId } from "@/app/utils/roles";
 import connect from "@/lib/db";
+import Block from "@/lib/models/block";
 import CoffeePreference from "@/lib/models/coffeePreference";
 import Swipe from "@/lib/models/swipe";
 import User from "@/lib/models/user";
@@ -22,10 +23,20 @@ export async function GET() {
         const swipedDocs = await Swipe.find({ fromUser: userId }, "toUser").lean();
         const swipedIds = swipedDocs.map((s: any) => s.toUser.toString());
 
-        // Fetch candidates: exclude myself + already swiped
-        // Note: we do NOT hard-filter by isProfileComplete so new users are still visible
+        // Get block relationships — users I blocked OR who blocked me
+        const [iBlocked, blockedMe] = await Promise.all([
+            Block.find({ blocker: userId }, "blocked").lean(),
+            Block.find({ blocked: userId }, "blocker").lean(),
+        ]);
+        const blockedIds = [
+            ...iBlocked.map((b: any) => b.blocked.toString()),
+            ...blockedMe.map((b: any) => b.blocker.toString()),
+        ];
+        const excludeIds = Array.from(new Set([...swipedIds, ...blockedIds]));
+
+        // Fetch candidates: exclude myself + already swiped + blocked
         const candidates: any[] = await User.find({
-            _id: { $ne: userId, $nin: swipedIds },
+            _id: { $ne: userId, $nin: excludeIds },
         })
             .select("_id firstName lastName photo bio gender lookingFor hobbies isOpenToMeet lastActiveAt profilePhotos dateOfBirth")
             .lean();
