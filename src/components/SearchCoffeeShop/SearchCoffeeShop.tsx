@@ -59,10 +59,8 @@ function SearchCoffeeShop() {
       }
     };
     getNearbyCoffee();
-    console.log("find nearby coffee shop");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedLocation]);
-
-  console.log("near: ", nearbyCoffeeShops);
 
   return (
     <div className="h-[calc(100vh-125px)] w-full relative">

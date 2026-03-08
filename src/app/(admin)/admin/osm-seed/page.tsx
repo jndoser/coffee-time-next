@@ -93,7 +93,7 @@ export default function OSMSeedPage() {
                             {result.message}
                             <br /><br />
                             <Text type="secondary">
-                                Note: You will now see these populating the database and they will be visible in the user's Map and Discover feeds.
+                                Note: You will now see these populating the database and they will be visible in the user&apos;s Map and Discover feeds.
                             </Text>
                         </div>
                     }
