@@ -64,6 +64,8 @@ export async function GET(req: Request) {
 
     const coffeeShops = await CoffeeShop.aggregate([
       { $match: filter },
+      // Sort OSM-seeded shops (with coordinates) to the top before pagination
+      { $sort: { latitude: -1, _id: -1 } },
       { $skip: skip },
       { $limit: limit },
       {
@@ -153,6 +155,8 @@ export async function GET(req: Request) {
           images: 1,
           likeCount: 1,
           isLiked: 1,
+          latitude: 1,
+          longitude: 1,
         },
       },
     ]);

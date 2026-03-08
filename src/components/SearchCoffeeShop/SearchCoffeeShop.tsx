@@ -13,9 +13,20 @@ import { RootState } from "@/store/store";
 import {
   setNearbyCoffeeShops,
   setSelectedLocation,
+  setSelectedShopName,
 } from "@/store/slicers/searchMapSlicer";
 import axios from "axios";
-import CoffeeShopMarker from "../CoffeeShopMarker/CoffeeShopMarker";
+import dynamic from "next/dynamic";
+
+// Dynamically import the map because react-leaflet requires the 'window' object, which breaks Next.js server-side rendering.
+const OSMMapClient = dynamic(() => import("./OSMMap"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-screen w-full flex items-center justify-center bg-gray-100">
+      <div className="text-xl font-bold text-gray-500">Loading Map...</div>
+    </div>
+  ),
+});
 
 function SearchCoffeeShop() {
   const selectedLocation = useSelector(
@@ -24,27 +35,28 @@ function SearchCoffeeShop() {
   const nearbyCoffeeShops = useSelector(
     (state: RootState) => state.searchMapState.nearbyCoffeeShops
   );
+  const selectedShopName = useSelector(
+    (state: RootState) => state.searchMapState.selectedShopName
+  );
   const dispatch = useDispatch();
 
-  const mapClickHandler = (e: MapMouseEvent) => {
-    dispatch(
-      setSelectedLocation(
-        new google.maps.LatLng(
-          parseFloat(e.detail.latLng?.lat.toString() || "0"),
-          parseFloat(e.detail.latLng?.lng.toString() || "0")
-        )
-      )
-    );
+  const mapClickHandler = (lat: number, lng: number) => {
+    dispatch(setSelectedLocation({ lat, lng }));
+    dispatch(setSelectedShopName(undefined)); // Clear shop name on manual click
   };
 
   useEffect(() => {
     const getNearbyCoffee = async () => {
-      const response = await axios.get(
-        `/api/coffee-shop/search-nearby?location=${`${selectedLocation
-          ?.lat()
-          .toString()},${selectedLocation?.lng().toString()}`}&radius=1500`
-      );
-      dispatch(setNearbyCoffeeShops(response.data));
+      if (!selectedLocation) return;
+      try {
+        const response = await axios.get(
+          `/api/coffee-shop/search-nearby?location=${selectedLocation.lat},${selectedLocation.lng}&radius=1500`
+        );
+        dispatch(setNearbyCoffeeShops(response.data));
+      } catch (error) {
+        console.error("Failed to fetch nearby coffee shops", error);
+        dispatch(setNearbyCoffeeShops([]));
+      }
     };
     getNearbyCoffee();
     console.log("find nearby coffee shop");
@@ -53,24 +65,15 @@ function SearchCoffeeShop() {
   console.log("near: ", nearbyCoffeeShops);
 
   return (
-    <APIProvider apiKey={process.env.NEXT_PUBLIC_MAPS_API_KEY as string}>
-      <div className="h-screen w-full relative">
-        <Map
-          center={selectedLocation}
-          defaultCenter={{ lat: 10.7769942, lng: 106.6953021 }}
-          defaultZoom={16}
-          gestureHandling={"greedy"}
-          fullscreenControl={false}
-          onClick={mapClickHandler}
-        >
-          <PlaceAutoComplete />
-          <Marker position={selectedLocation} />
-          {nearbyCoffeeShops.map((coffeeShop) => (
-            <CoffeeShopMarker key={coffeeShop.name} coffeeShop={coffeeShop} />
-          ))}
-        </Map>
-      </div>
-    </APIProvider>
+    <div className="h-[calc(100vh-125px)] w-full relative">
+      <PlaceAutoComplete />
+      <OSMMapClient
+        selectedLocation={selectedLocation}
+        selectedShopName={selectedShopName}
+        nearbyCoffeeShops={nearbyCoffeeShops}
+        onMapClick={mapClickHandler}
+      />
+    </div>
   );
 }
 

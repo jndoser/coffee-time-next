@@ -9,12 +9,14 @@ export interface NearbyCoffeeShopType {
 }
 
 export interface SearchMapState {
-  selectedLocation: google.maps.LatLng | undefined;
+  selectedLocation: { lat: number; lng: number } | undefined;
+  selectedShopName: string | undefined;
   nearbyCoffeeShops: NearbyCoffeeShopType[];
 }
 
 const initialState: SearchMapState = {
   selectedLocation: undefined,
+  selectedShopName: undefined,
   nearbyCoffeeShops: [],
 };
 
@@ -22,8 +24,11 @@ export const searchMapSlice = createSlice({
   name: "searchMapState",
   initialState,
   reducers: {
-    setSelectedLocation: (state, action: PayloadAction<google.maps.LatLng>) => {
+    setSelectedLocation: (state, action: PayloadAction<{ lat: number; lng: number }>) => {
       state.selectedLocation = action.payload;
+    },
+    setSelectedShopName: (state, action: PayloadAction<string | undefined>) => {
+      state.selectedShopName = action.payload;
     },
     setNearbyCoffeeShops: (
       state,
@@ -34,6 +39,6 @@ export const searchMapSlice = createSlice({
   },
 });
 
-export const { setSelectedLocation, setNearbyCoffeeShops } =
+export const { setSelectedLocation, setSelectedShopName, setNearbyCoffeeShops } =
   searchMapSlice.actions;
 export default searchMapSlice.reducer;

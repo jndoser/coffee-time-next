@@ -201,12 +201,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({
             </SignedIn>
           </div>
         </div>
-        <Search
-          placeholder="Input the name ..."
-          style={{ width: "500px", marginTop: "10px", marginBottom: "10px" }}
-          size="large"
-          onChange={(e) => setKeywords(e.target.value)}
-        />
+        {!pathname.startsWith("/search-coffee-shop") && !pathname.startsWith("/messages") && (
+          <Search
+            placeholder="Search coffee shops..."
+            style={{ width: "500px", marginTop: "10px", marginBottom: "10px" }}
+            size="large"
+            onChange={(e) => setKeywords(e.target.value)}
+          />
+        )}
       </Header>
       <Content style={{ padding: "0 48px", backgroundColor: "white" }}>
         <div

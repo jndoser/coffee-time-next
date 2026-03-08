@@ -29,6 +29,10 @@ const items = [
     key: "reports",
     label: "User Reports",
   },
+  {
+    key: "osm-seed",
+    label: "Map Data Seeding",
+  },
 ];
 
 interface AdminLayoutProps {
@@ -80,6 +84,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         return "request-coffee";
       case "/admin/reports":
         return "reports";
+      case "/admin/osm-seed":
+        return "osm-seed";
       default:
         return "request-owner";
     }
@@ -122,6 +128,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             if (key === "request-owner") router.push("/admin/owner-registration");
             if (key === "request-coffee") router.push("/admin/coffee-shop-registration");
             if (key === "reports") router.push("/admin/reports");
+            if (key === "osm-seed") router.push("/admin/osm-seed");
           }}
         />
       </Sider>
